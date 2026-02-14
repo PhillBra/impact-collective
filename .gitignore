@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+._*
+
+# Backups
+*-BACKUP-*.html
+
+# Editor
+*.swp
+*.swo
+*~
