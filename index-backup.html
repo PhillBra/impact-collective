@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impact Collective – PHINEO gAG</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="Grafiken/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="Grafiken/favicon-192.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .font-serif-display { font-family: Georgia, 'Times New Roman', serif; }
+    .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const categories = [
+      { id: "alle", label: "Alle", badge: "Alle" },
+      { id: "ngos", label: "NGOs", badge: "NGO" },
+      { id: "startups", label: "Startups", badge: "Startup" },
+      { id: "vcs", label: "VCs", badge: "VC" },
+      { id: "personen", label: "Personen", badge: "Person" },
+      { id: "stiftungen", label: "Stiftungen", badge: "Stiftung" },
+      { id: "familyoffices", label: "Family Offices", badge: "Family Office" },
+      { id: "unternehmen", label: "Unternehmen", badge: "Unternehmen" },
+      { id: "staat", label: "Staat", badge: "Staat" },
+      { id: "verbaende", label: "Verbände", badge: "Verband" },
+      { id: "infrastruktur", label: "Infrastruktur", badge: "Infrastruktur" },
+      { id: "forschung", label: "Forschung", badge: "Forschung" },
+    ];
+
+    const categoryColors = {
+      ngos: { bg: "#EC734D", light: "#FEF0EB", text: "#9C3A1A" },
+      startups: { bg: "#67DE93", light: "#EDFBF2", text: "#1A6B38" },
+      vcs: { bg: "#45B4C6", light: "#E8F6F9", text: "#1A6B7A" },
+      personen: { bg: "#AC5CEF", light: "#F3EAFD", text: "#5E2A8A" },
+      stiftungen: { bg: "#FEA179", light: "#FFF3ED", text: "#9C4A1A" },
+      familyoffices: { bg: "#D4A843", light: "#FBF6E8", text: "#7A5F1A" },
+      unternehmen: { bg: "#365F63", light: "#EBF0F0", text: "#1A3335" },
+      staat: { bg: "#6B8FA3", light: "#EDF2F5", text: "#2E4F5E" },
+      verbaende: { bg: "#5B8C5A", light: "#EDF5ED", text: "#2E4A2E" },
+      infrastruktur: { bg: "#6CBDC6", light: "#EAF7F9", text: "#1A6B75" },
+      forschung: { bg: "#7B8FD4", light: "#EDEFFA", text: "#2E3B6E" },
+    };
+
+    const actors = [
+      { id: 1, name: "Viva con Agua", category: "ngos", tagline: "Sauberes Trinkwasser für alle Menschen weltweit", description: "Seit 2006 setzt sich Viva con Agua für den Zugang zu sauberem Trinkwasser ein – mit Kreativität, Musik und einer globalen Community. Was als Initiative des FC St. Pauli begann, ist heute eine internationale Bewegung mit Projekten in über 20 Ländern.", location: "Hamburg", founded: "2006", sdgs: ["6", "17"], website: "vivaconagua.org", image: "linear-gradient(135deg, #1a8fba 0%, #43c6ac 100%)" },
+      { id: 2, name: "#ichbinhier", category: "ngos", tagline: "Digitale Zivilcourage gegen Hass im Netz", description: "39.000 Mitglieder engagieren sich täglich für respektvolle und sachliche Diskussionen in sozialen Medien.", location: "Berlin", founded: "2016", sdgs: ["16", "10"], website: "ichbinhier.eu", image: "linear-gradient(135deg, #EC734D 0%, #f5a07a 100%)" },
+      { id: 3, name: "Teach First Deutschland", category: "ngos", tagline: "Bildungsgerechtigkeit durch exzellente Lehrkräfte", description: "Hochschulabsolvent*innen unterrichten als Fellows an Schulen in sozialen Brennpunkten.", location: "Berlin", founded: "2009", sdgs: ["4", "10"], website: "teachfirst.de", image: "linear-gradient(135deg, #e8425c 0%, #f09070 100%)" },
+      { id: 4, name: "Sea-Watch", category: "ngos", tagline: "Zivile Seenotrettung im Mittelmeer", description: "Seit 2015 rettet Sea-Watch Menschen aus Seenot und dokumentiert Menschenrechtsverletzungen an den europäischen Außengrenzen.", location: "Berlin", founded: "2015", sdgs: ["16", "10", "3"], website: "sea-watch.org", image: "linear-gradient(135deg, #1e3a5f 0%, #3a7bd5 100%)" },
+      { id: 5, name: "PHLAIR", category: "startups", tagline: "Direct Air Capture – CO₂ direkt aus der Luft filtern", description: "PHLAIR entwickelt Technologie zur direkten CO₂-Abscheidung aus der Atmosphäre. Die Pilotanlage in Ismaning filtert 10t CO₂ pro Jahr.", location: "Ismaning", founded: "2021", sdgs: ["13", "9"], website: "phlair.com", image: "linear-gradient(135deg, #2d3436 0%, #636e72 100%)" },
+      { id: 6, name: "Ecosia", category: "startups", tagline: "Die Suchmaschine, die Bäume pflanzt", description: "Über 200 Millionen gepflanzte Bäume durch Werbeeinnahmen aus Suchanfragen. Ecosia ist ein Social Business.", location: "Berlin", founded: "2009", sdgs: ["13", "15"], website: "ecosia.org", image: "linear-gradient(135deg, #27ae60 0%, #a8e063 100%)" },
+      { id: 7, name: "Tomorrow Bank", category: "startups", tagline: "Nachhaltiges Banking für eine grüne Zukunft", description: "Jeder Euro auf dem Konto fließt in nachhaltige Projekte statt in fossile Industrien.", location: "Hamburg", founded: "2018", sdgs: ["13", "12"], website: "tomorrow.one", image: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)" },
+      { id: 8, name: "Concular", category: "startups", tagline: "Zirkuläres Bauen für zukunftssichere Immobilien", description: "Digitale Plattform für die Wiederverwendung von Baumaterialien. Macht Gebäude zu Rohstofflagern.", location: "Berlin", founded: "2020", sdgs: ["12", "11", "13"], website: "concular.de", image: "linear-gradient(135deg, #1a3a4a 0%, #2d7d9a 100%)" },
+      { id: 9, name: "Klim", category: "startups", tagline: "Regenerative Landwirtschaft skalieren", description: "Verbindet Landwirt*innen mit Unternehmen, die CO₂-Reduktion durch gesunde Böden finanzieren.", location: "Berlin", founded: "2020", sdgs: ["13", "15", "2"], website: "klim.eco", image: "linear-gradient(135deg, #4a7c59 0%, #8cb369 100%)" },
+      { id: 35, name: "AUAR", category: "startups", tagline: "KI-gesteuerte Roboter-Mikrofabriken für nachhaltiges Bauen", description: "Produziert nachhaltige Holzrahmenhäuser in unter 12 Stunden mit KI und Robotik. Expandiert von UK in die USA und nach Europa.", location: "Bristol / London", founded: "2020", sdgs: ["11", "13", "8"], website: "auar.io", image: "linear-gradient(135deg, #1a1a2e 0%, #2d4a7a 100%)" },
+      { id: 10, name: "World Fund", category: "vcs", tagline: "Europas größter Climate-Tech-VC", description: "Investiert in Startups, die zusammen 2 Gigatonnen CO₂ einsparen können. Fondsvolumen: 350 Mio. EUR.", location: "Berlin", founded: "2021", sdgs: ["13", "9"], website: "worldfund.vc", image: "linear-gradient(135deg, #0c2340 0%, #1a5276 100%)" },
+      { id: 11, name: "ANANDA Impact Ventures", category: "vcs", tagline: "Impact Venture Capital seit 2009", description: "Einer der Pioniere im europäischen Impact Investing. Über 40 Portfolio-Unternehmen.", location: "München", founded: "2009", sdgs: ["3", "4", "1"], website: "ananda.vc", image: "linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%)" },
+      { id: 12, name: "BonVenture", category: "vcs", tagline: "Social Venture Capital aus München", description: "Deutschlands erster Social Venture Capital Fonds. Investiert in Sozialunternehmen seit 2003.", location: "München", founded: "2003", sdgs: ["1", "10", "17"], website: "bonventure.de", image: "linear-gradient(135deg, #355C7D 0%, #6C5B7B 100%)" },
+      { id: 34, name: "Deutsche Nachhaltigkeit", category: "vcs", tagline: "Börsennotierter Impact Investor – Nachhaltigkeit trifft Kapitalmarkt", description: "Investiert als Ankerinvestor Eigenkapital in ausgewählte Nachhaltigkeitsunternehmen und macht sie kapitalmarktfähig. Begleitet Portfolio-Unternehmen strategisch von der Entwicklung marktreifer Geschäftsmodelle bis zur Integration in nachhaltige Wertschöpfungsketten.", location: "Frankfurt am Main", founded: "2019", sdgs: ["13", "9", "8", "17"], website: "deutsche-nachhaltigkeit.com", image: "linear-gradient(135deg, #0020A3 0%, #1a3a8a 60%, #0a2540 100%)" },
+      { id: 33, name: "Anna-Lena von Hodenberg", category: "personen", tagline: "Kämpft gegen digitale Gewalt und Hass im Netz", description: "Gründerin und Geschäftsführerin von HateAid. Bundesverdienstkreuz für den Einsatz gegen digitale Gewalt.", location: "Berlin", role: "Gründerin, HateAid", image: "linear-gradient(135deg, #1a5276 0%, #45B4C6 100%)" },
+      { id: 13, name: "Andreas Rickert", category: "personen", tagline: "Macht Impact für etablierte Akteure anschlussfähig", description: "CEO von PHINEO und Vorstand der Deutsche Nachhaltigkeit AG. Bringt Konzerne, Stiftungen und Staat in Impact-Logiken.", location: "Berlin", role: "CEO, PHINEO gAG · Vorstand, Deutsche Nachhaltigkeit AG", image: "linear-gradient(135deg, #20383A 0%, #365F63 100%)" },
+      { id: 14, name: "Verena Pausder", category: "personen", tagline: "Macht Impact mehrheitsfähig", description: "Vorsitzende Startup-Verband. Bringt Impact-Themen in Wirtschafts- und Standortpolitik.", location: "Berlin", role: "Vorsitzende, Startup-Verband", image: "linear-gradient(135deg, #6C3483 0%, #AF7AC5 100%)" },
+      { id: 15, name: "Tim Schumacher", category: "personen", tagline: "Entscheidet, was skalierbarer Impact ist", description: "Gründer World Fund. Größter deutscher Climate-Impact-VC.", location: "Berlin", role: "Gründer, World Fund", image: "linear-gradient(135deg, #1a5276 0%, #2e86c1 100%)" },
+      { id: 16, name: "Christian Vollmann", category: "personen", tagline: "Bringt Impact aus der NGO-Ecke in die Wirtschaft", description: "Purpose Foundation & Serial Founder. Treibt Verantwortungseigentum.", location: "Berlin", role: "Gründer, Purpose Foundation", image: "linear-gradient(135deg, #1e3a2b 0%, #3a7c5f 100%)" },
+      { id: 17, name: "Markus Sauerhammer", category: "personen", tagline: "Definiert, was der Staat als Impact behandelt", description: "SEND e.V. Hat Social Entrepreneurship politisch sichtbar gemacht.", location: "Berlin", role: "Vorstand, SEND e.V.", image: "linear-gradient(135deg, #4a235a 0%, #7d3c98 100%)" },
+      { id: 18, name: "Bertelsmann Stiftung", category: "stiftungen", tagline: "Gesellschaftliche Teilhabe durch evidenzbasierte Reformarbeit", description: "Eine der größten operativen Stiftungen Europas. Finanziert u.a. IMMPACT.", location: "Gütersloh", founded: "1977", sdgs: ["4", "16", "10"], website: "bertelsmann-stiftung.de", image: "linear-gradient(135deg, #c0392b 0%, #e74c3c 100%)" },
+      { id: 19, name: "BMW Foundation", category: "stiftungen", tagline: "Responsible Leadership weltweit fördern", description: "Vernetzt Führungspersönlichkeiten für nachhaltige Entwicklung.", location: "München", founded: "1970", sdgs: ["17", "16"], website: "bmw-foundation.org", image: "linear-gradient(135deg, #1c2833 0%, #566573 100%)" },
+      { id: 20, name: "Schöpflin Stiftung", category: "stiftungen", tagline: "Demokratie, Medien und soziale Innovation", description: "Fördert systemischen Wandel durch zivilgesellschaftliche Infrastruktur.", location: "Lörrach", founded: "2001", sdgs: ["16", "11"], website: "schoepflin-stiftung.de", image: "linear-gradient(135deg, #1a472a 0%, #3d8b5f 100%)" },
+      { id: 21, name: "Reimann Investors", category: "familyoffices", tagline: "Impact-orientiertes Investieren mit Langfristperspektive", description: "Family Office mit Fokus auf nachhaltige Investments.", location: "München", founded: "2014", website: "reimanninvestors.com", image: "linear-gradient(135deg, #7d6608 0%, #b7950b 100%)" },
+      { id: 22, name: "Wala Capital", category: "familyoffices", tagline: "Kapital als Hebel für systemischen Wandel", description: "Investiert in Frühphasen-Startups mit messbarem Impact.", location: "Berlin", founded: "2019", website: "wala.capital", image: "linear-gradient(135deg, #6e4b1e 0%, #b8860b 100%)" },
+      { id: 23, name: "Vaude", category: "unternehmen", tagline: "Europas nachhaltigster Outdoor-Ausrüster", description: "Klimaneutraler Firmensitz, faire Lieferketten, Gemeinwohl-Bilanz.", location: "Tettnang", founded: "1974", sdgs: ["12", "13", "8"], website: "vaude.com", image: "linear-gradient(135deg, #1a5632 0%, #45a049 100%)" },
+      { id: 24, name: "GLS Bank", category: "unternehmen", tagline: "Die erste sozial-ökologische Universalbank", description: "Seit 1974 fließt jeder Kredit in nachhaltige Projekte.", location: "Bochum", founded: "1974", sdgs: ["1", "13", "7"], website: "gls.de", image: "linear-gradient(135deg, #2e5b3e 0%, #5dab6a 100%)" },
+      { id: 25, name: "BMWK", category: "staat", tagline: "Bundesministerium für Wirtschaft und Klimaschutz", description: "Fördert soziale Innovation und Impact-Ökosysteme durch Programme wie NaWi.", location: "Berlin", website: "bmwk.de", image: "linear-gradient(135deg, #1a1a2e 0%, #3a3a5c 100%)" },
+      { id: 26, name: "GIZ", category: "staat", tagline: "Internationale Zusammenarbeit für nachhaltige Entwicklung", description: "Setzt weltweit Projekte um, die Entwicklung verbinden. Über 25.000 Mitarbeitende.", location: "Bonn / Eschborn", website: "giz.de", image: "linear-gradient(135deg, #1a4a5c 0%, #2d7d9a 100%)" },
+      { id: 27, name: "PHINEO", category: "infrastruktur", tagline: "Für mehr Wirkung – Home of Impact", description: "Analyse- und Beratungshaus für gesellschaftliches Engagement. Betreiber der Impact Collective Plattform.", location: "Berlin", founded: "2010", website: "phineo.org", image: "linear-gradient(135deg, #20383A 0%, #6CBDC6 100%)" },
+      { id: 28, name: "ProjectTogether", category: "infrastruktur", tagline: "Brücken bauen zwischen Innovation und Verwaltung", description: "Verbindet zivilgesellschaftliche Innovation mit staatlichen Strukturen.", location: "Berlin", founded: "2017", website: "projecttogether.org", image: "linear-gradient(135deg, #f39c12 0%, #e74c3c 100%)" },
+      { id: 29, name: "SEND e.V.", category: "infrastruktur", tagline: "Das Netzwerk für Social Entrepreneurship in Deutschland", description: "Politische Interessenvertretung von über 800 Sozialunternehmen.", location: "Berlin", founded: "2017", website: "send-ev.de", image: "linear-gradient(135deg, #2980b9 0%, #6dd5fa 100%)" },
+      { id: 30, name: "Circular Republic", category: "infrastruktur", tagline: "Die Plattform für Kreislaufwirtschaft", description: "Initiative von UnternehmerTUM für zirkuläre Geschäftsmodelle.", location: "München", founded: "2021", website: "circular-republic.org", image: "linear-gradient(135deg, #00b894 0%, #00cec9 100%)" },
+      { id: 31, name: "TU München – ERI", category: "forschung", tagline: "Entrepreneurship Research Institute", description: "Erforscht Social Entrepreneurship und Impact-Messung.", location: "München", website: "tum.de", image: "linear-gradient(135deg, #0d47a1 0%, #42a5f5 100%)" },
+      { id: 32, name: "CSI Heidelberg", category: "forschung", tagline: "Centre for Social Investment", description: "Führendes Forschungszentrum für soziale Investitionen an der Uni Heidelberg.", location: "Heidelberg", website: "csi.uni-heidelberg.de", image: "linear-gradient(135deg, #b71c1c 0%, #e57373 100%)" },
+      { id: 36, name: "BNW", category: "verbaende", tagline: "Die Stimme der nachhaltigen Wirtschaft", description: "Bundesverband Nachhaltige Wirtschaft e.V. – ökologisch orientierter Unternehmensverband und politische Interessenvertretung für nachhaltige Wirtschaftspolitik. Über 660 Mitgliedsunternehmen.", location: "Berlin", founded: "1992", sdgs: ["8", "12", "13"], website: "bnw-bundesverband.de", image: "linear-gradient(135deg, #2e5b3e 0%, #5B8C5A 100%)" },
+      { id: 37, name: "B.A.U.M. e.V.", category: "verbaende", tagline: "Europas größtes Netzwerk für nachhaltiges Wirtschaften", description: "Bundesdeutscher Arbeitskreis für Umweltbewusstes Management. Vernetzt seit 1984 rund 800 Unternehmen für praxisnahen Wissensaustausch zu Nachhaltigkeit.", location: "Hamburg", founded: "1984", sdgs: ["12", "13", "8"], website: "baumev.de", image: "linear-gradient(135deg, #4a7c59 0%, #8cb369 100%)" },
+      { id: 38, name: "Bundesinitiative Impact Investing", category: "verbaende", tagline: "Kapital für Wirkung – nachhaltig und regenerativ investieren", description: "Fördert Bildung, Wissen und Standards rund um Impact Investing in Deutschland. Über 110 Mitglieder. Deutsches National Advisory Board des Global Steering Group for Impact Investment.", location: "Berlin", founded: "2020", sdgs: ["1", "8", "10", "13"], website: "bundesinitiative-impact-investing.org", image: "linear-gradient(135deg, #1a3a5f 0%, #4a8ab5 100%)" },
+    ];
+
+    const sdgData = {
+      1: { name: "Keine Armut", color: "#E5243B" },
+      2: { name: "Kein Hunger", color: "#DDA63A" },
+      3: { name: "Gesundheit", color: "#4C9F38" },
+      4: { name: "Hochwertige Bildung", color: "#C5192D" },
+      5: { name: "Geschlechtergleichheit", color: "#FF3A21" },
+      6: { name: "Sauberes Wasser", color: "#26BDE2" },
+      7: { name: "Bezahlbare Energie", color: "#FCC30B" },
+      8: { name: "Menschenwürdige Arbeit", color: "#A21942" },
+      9: { name: "Industrie & Innovation", color: "#FD6925" },
+      10: { name: "Weniger Ungleichheiten", color: "#DD1367" },
+      11: { name: "Nachhaltige Städte", color: "#FD9D24" },
+      12: { name: "Nachhaltiger Konsum", color: "#BF8B2E" },
+      13: { name: "Klimaschutz", color: "#3F7E44" },
+      14: { name: "Leben unter Wasser", color: "#0A97D9" },
+      15: { name: "Leben an Land", color: "#56C02B" },
+      16: { name: "Frieden & Gerechtigkeit", color: "#00689D" },
+      17: { name: "Partnerschaften", color: "#19486A" },
+    };
+
+    const sdgIconUrls = {
+      1: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Sustainable_Development_Goal_1.png/200px-Sustainable_Development_Goal_1.png",
+      2: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Sustainable_Development_Goal_2.png/200px-Sustainable_Development_Goal_2.png",
+      3: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Sustainable_Development_Goal_3.png/200px-Sustainable_Development_Goal_3.png",
+      4: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Sustainable_Development_Goal_4.png/200px-Sustainable_Development_Goal_4.png",
+      5: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Sustainable_Development_Goal_5.png/200px-Sustainable_Development_Goal_5.png",
+      6: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Sustainable_Development_Goal_6.png/200px-Sustainable_Development_Goal_6.png",
+      7: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Sustainable_Development_Goal_7.png/200px-Sustainable_Development_Goal_7.png",
+      8: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Sustainable_Development_Goal_8.png/200px-Sustainable_Development_Goal_8.png",
+      9: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Sustainable_Development_Goal_9.png/200px-Sustainable_Development_Goal_9.png",
+      10: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Sustainable_Development_Goal_10.png/200px-Sustainable_Development_Goal_10.png",
+      11: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Sustainable_Development_Goal_11.png/200px-Sustainable_Development_Goal_11.png",
+      12: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Sustainable_Development_Goal_12.png/200px-Sustainable_Development_Goal_12.png",
+      13: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Sustainable_Development_Goal_13.png/200px-Sustainable_Development_Goal_13.png",
+      14: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Sustainable_Development_Goal_14.png/200px-Sustainable_Development_Goal_14.png",
+      15: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Sustainable_Development_Goal_15.png/200px-Sustainable_Development_Goal_15.png",
+      16: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Sustainable_Development_Goal_16.png/200px-Sustainable_Development_Goal_16.png",
+      17: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Sustainable_Development_Goal_17.png/200px-Sustainable_Development_Goal_17.png",
+    };
+
+    const actorImageStyles = {
+      13: { objectPosition: "center 45%" },
+      15: { objectPosition: "60% 55%" },
+      16: { objectPosition: "center 55%" },
+      17: { objectPosition: "60% 45%" },
+    };
+
+    const wirktSiegel = [1, 3, 27];
+    const immpactVerifiziert = [5, 6, 7, 8, 9];
+    const dnkVerifiziert = [10, 11, 12];
+
+    const actorLogos = {
+      1: "https://www.google.com/s2/favicons?domain=vivaconagua.org&sz=128",
+      2: "https://www.google.com/s2/favicons?domain=ichbinhier.eu&sz=128",
+      3: "https://www.google.com/s2/favicons?domain=teachfirst.de&sz=128",
+      4: "https://www.google.com/s2/favicons?domain=sea-watch.org&sz=128",
+      5: "https://www.google.com/s2/favicons?domain=phlair.com&sz=128",
+      6: "https://www.google.com/s2/favicons?domain=ecosia.org&sz=128",
+      7: "https://www.google.com/s2/favicons?domain=tomorrow.one&sz=128",
+      8: "https://www.google.com/s2/favicons?domain=concular.de&sz=128",
+      9: "https://www.google.com/s2/favicons?domain=klim.eco&sz=128",
+      10: "https://www.google.com/s2/favicons?domain=worldfund.vc&sz=128",
+      11: "https://www.google.com/s2/favicons?domain=ananda.vc&sz=128",
+      12: "https://www.google.com/s2/favicons?domain=bonventure.de&sz=128",
+      18: "https://www.google.com/s2/favicons?domain=bertelsmann-stiftung.de&sz=128",
+      19: "https://www.google.com/s2/favicons?domain=bmw-foundation.org&sz=128",
+      20: "https://www.google.com/s2/favicons?domain=schoepflin-stiftung.de&sz=128",
+      21: "https://www.google.com/s2/favicons?domain=reimanninvestors.com&sz=128",
+      22: "https://www.google.com/s2/favicons?domain=wala.capital&sz=128",
+      23: "https://www.google.com/s2/favicons?domain=vaude.com&sz=128",
+      24: "https://www.google.com/s2/favicons?domain=gls.de&sz=128",
+      25: "https://www.google.com/s2/favicons?domain=bmwk.de&sz=128",
+      26: "https://www.google.com/s2/favicons?domain=giz.de&sz=128",
+      27: "https://www.google.com/s2/favicons?domain=phineo.org&sz=128",
+      28: "https://www.google.com/s2/favicons?domain=projecttogether.org&sz=128",
+      29: "https://www.google.com/s2/favicons?domain=send-ev.de&sz=128",
+      30: "https://www.google.com/s2/favicons?domain=circular-republic.org&sz=128",
+      31: "https://www.google.com/s2/favicons?domain=tum.de&sz=128",
+      32: "https://www.google.com/s2/favicons?domain=csi.uni-heidelberg.de&sz=128",
+      34: "https://www.google.com/s2/favicons?domain=deutsche-nachhaltigkeit.com&sz=128",
+      35: "https://www.google.com/s2/favicons?domain=auar.io&sz=128",
+      36: "https://www.google.com/s2/favicons?domain=bnw-bundesverband.de&sz=128",
+      37: "https://www.google.com/s2/favicons?domain=baumev.de&sz=128",
+      38: "https://www.google.com/s2/favicons?domain=bundesinitiative-impact-investing.org&sz=128",
+    };
+
+    const actorImages = {
+      1: "https://framerusercontent.com/images/AkUIfzVtctdKtPMxjuXFYvQcUGs.jpg",
+      2: "https://www.ichbinhier.eu/wp-content/uploads/2025/12/iStock-1439749464-1024x683.jpg",
+      3: "https://teachfirst.de/wp-content/uploads/2025/02/TFD-15-Jahre-final-181-scaled.webp",
+      4: "https://sea-watch.org/wp-content/uploads/2023/11/230724_Oliver-Kulikowski_98292-scaled.jpg",
+      5: "https://a.storyblok.com/f/286849/2400x1254/8934fc38ac/phlair_og.png",
+      6: "https://www.ecosia.org/static/og/facebook.jpg",
+      7: "https://images.ctfassets.net/t8zoy2hhffa5/1MGU5aHlxJPlET1DRYu5e3/51b1f4f6a20c7c9b339b65d9bf2f2fb1/Website_Imagery2.0_PreviewPage__1_.jpg",
+      8: "https://concular.de/wp-content/uploads/2025/12/2025_CON_ICE_CITY_Erfurt_c_Christopher_Schmid_4-1024x683.jpg",
+      9: "https://cdn.prod.website-files.com/6436cbadfd9f4b367cc103d5/66cd7e042139fecf1c6b6067_Healthy%20soil%20DE.avif",
+      10: "https://cdn.prod.website-files.com/64cc256968bec6c987a288a0/6744aef60c67c8e2fb3676f6_Groupshot_WorldFund-2.avif",
+      11: "https://ananda.vc/wp-content/uploads/Ananda_Europe_Earth.avif",
+      12: "https://www.bonventure.de/wp-content/themes/bonventure/load/favicon/bonventure-og-image.jpg",
+      13: "https://machtwas.de/wp-content/uploads/2024/02/Dr.-Andreas-Rickert.png",
+      14: "https://www.htgf.de/wp-content/uploads/2024/04/MicrosoftTeams-image-49.jpg",
+      15: "https://machtwas.de/wp-content/uploads/2023/11/Tim-Schumacher-Co-Gr%C3%BCnder-des-World-Funds.png",
+      16: "https://image.capital.de/31791068/t/kW/v7/w1440/r1.5/-/christian-vollmann-carbon-one.jpg",
+      17: "https://static.wixstatic.com/media/4e6533_095235072045453faf1790f95c44baee~mv2.jpg/v1/fill/w_1024,h_1024,al_c,q_85/markus-sauerhammer.1024x1024.jpg",
+      18: "https://www.bertelsmann-stiftung.de//fileadmin/files/_processed_/a/d/csm_fact-header_3f4c727c31.jpg",
+      19: "https://a.storyblok.com/f/254844/1920x1080/1fdea39255/2026_bmwfoundation_allensbach_16x9.jpg/m/2560x1097/smart",
+      20: "https://www.schoepflin-stiftung.de/fileadmin/_processed_/1/0/csm_2602_F%C3%B6rderbereich_Lernen-und-Partizipation_gro%C3%9F_5fb9af26bf.jpg",
+      21: "https://images.prismic.io/reimann/ca376221-d6c2-4cd0-bab8-6ca283a9d5ec_JEE_180725_ReimannInvestors_0620.jpg?auto=compress,format&fit=max&w=1500&q=80",
+      22: "https://www.h4a-architekten.de/sites/default/files/styles/slider/public/projekte/WALA_Perspektive_2.jpg?itok=jD1BvkrL",
+      23: "https://www.vaude.com/media/.renditions/catalog/category/W25_Kommunikation/file.jpg",
+      24: "https://www.gls.de/media/Bilder/Angebote/Kampagnen/Fuer_alle/GLS_Imagekampagne_25_Gruppe_klein.jpg",
+      25: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Bundesministerium_f%C3%BCr_Wirtschaft_und_Klimaschutz_Logo.svg/1200px-Bundesministerium_f%C3%BCr_Wirtschaft_und_Klimaschutz_Logo.svg.png",
+      26: null,
+      27: "https://www.phineo.org/uploads/07_PHINEO-Insides/_high/Phineo_2-1.jpg",
+      28: "https://projecttogether.org/wp-content/uploads/TEST_Header-Startseite-2.png",
+      29: "https://www.send-ev.de/wp-content/uploads/2021/03/small-green-with-image-copy-6.jpg",
+      30: "https://utum-subdomains.transforms.svdcdn.com/production/images/circular-republic/Header/circular-republic-header-homepage-keyvisual-black-getty1213747572.jpg",
+      31: "https://www.tum.de/fileadmin/_processed_/a/1/csm_OG2_a211f33903.jpg",
+      32: null,
+      33: "https://hateaid.org/wp-content/uploads/2025/05/hateaid-team-portraets-2020-anna-lena-von-hodenberg-dlfa-berlin-6-c-andrea-heinsohn-photography-1024x681.jpg",
+      34: "https://deutsche-nachhaltigkeit.com/assets/_768x458_crop_center-center_60_line/DN_Stage.jpg",
+      35: null,
+      36: null,
+      37: null,
+      38: null,
+    };
+
+    const profileExtras = {
+      1: { highlights: ["Projekte in über 20 Ländern", "Über 4 Mio. Menschen erreicht", "2024: Erweiterung auf WASH-Programme"], impact: [{ num: "4 Mio.", label: "Menschen mit Trinkwasser" }, { num: "20+", label: "Länder weltweit" }, { num: "28.000+", label: "Aktive Supporter" }], quote: "Wasser ist ein Menschenrecht – und wir machen daraus eine Bewegung.", longDesc: "Was 2006 als Initiative rund um den FC St. Pauli begann, hat sich zu einer der bekanntesten deutschen NGOs entwickelt. Viva con Agua verbindet Kreativität, Musik und Sport mit dem Engagement für sauberes Trinkwasser. Die Organisation arbeitet mit lokalen Partnern zusammen, um WASH-Projekte in Ländern wie Äthiopien, Nepal und Uganda umzusetzen.", video: { id: "TvG4nPYrb8A", title: "Viva con Agua – Wasser für alle" } },
+      5: { highlights: ["EU Innovation Council gefördert", "Pilotanlage: 10t CO₂/Jahr", "Patentierte Membran-Technologie"], impact: [{ num: "10t", label: "CO₂ pro Jahr (Pilot)" }, { num: "2024", label: "EIC Förderung erhalten" }, { num: "15", label: "Ingenieur*innen im Team" }], quote: "Die Atmosphäre ist unsere Mine – wir holen den Kohlenstoff zurück.", longDesc: "PHLAIR hat eine neuartige Membran-Technologie entwickelt, die CO₂ energieeffizient direkt aus der Umgebungsluft filtern kann. Die Pilotanlage in Ismaning bei München demonstriert die Technologie im Realbetrieb." },
+      6: { highlights: ["200+ Millionen Bäume gepflanzt", "100% der Gewinne für den Planeten", "20+ Mio. aktive Nutzer*innen"], impact: [{ num: "200 Mio.+", label: "Bäume gepflanzt" }, { num: "20 Mio.", label: "Aktive Nutzer*innen" }, { num: "100%", label: "Gewinne reinvestiert" }], quote: "Jede Suche ist ein Baum. Jeder Baum ist ein Statement.", longDesc: "Ecosia ist die Suchmaschine, die ihre Werbeeinnahmen in Aufforstungsprojekte weltweit investiert. Gegründet 2009 in Berlin, hat sich Ecosia als Social Business positioniert." },
+      10: { highlights: ["350 Mio. EUR Fondsvolumen", "2-Gigatonnen-Ziel", "Portfolio: 15+ Climate-Tech-Startups"], impact: [{ num: "350 Mio.", label: "EUR Fondsvolumen" }, { num: "2 Gt", label: "CO₂-Einspar-Potenzial" }, { num: "15+", label: "Portfolio-Unternehmen" }], quote: "Wir investieren nur in Startups, die mindestens 100 Megatonnen CO₂ einsparen können.", longDesc: "World Fund ist Europas größter Climate-Tech-Venture-Capital-Fonds und investiert ausschließlich in Startups mit massivem CO₂-Einsparungspotenzial." },
+      13: { highlights: ["Gründer & CEO von PHINEO seit 2010", "Berater der Bundesregierung", "Autor: 'Richtig Gutes tun'"], impact: [{ num: "15+", label: "Jahre Impact-Arbeit" }, { num: "400+", label: "Analysierte NGOs" }, { num: "3", label: "Beratungsmandate Bund" }], quote: "Impact ist kein Nischenthema – es ist die Zukunft jeder ernsthaften Investition.", longDesc: "Andreas Rickert hat mit PHINEO eine Institution geschaffen, die das Thema Wirkungsorientierung in Deutschland maßgeblich geprägt hat. Als ehemaliger McKinsey-Berater und Weltbank-Mitarbeiter bringt er die Sprache der Wirtschaft in die Sozialwirtschaft." },
+      14: { highlights: ["Vorsitzende Startup-Verband", "Bestseller-Autorin", "Gründerin Fox & Sheep"], impact: [{ num: "1", label: "Spiegel-Bestseller" }, { num: "400+", label: "Startups im Verband" }, { num: "3 Mio.+", label: "Kinder erreicht" }], quote: "Wir brauchen eine Wirtschaft, in der Impact kein Add-on ist, sondern der Kern.", longDesc: "Verena Pausder ist eine der sichtbarsten Stimmen an der Schnittstelle von Unternehmertum, Innovation und gesellschaftlicher Verantwortung." },
+      18: { highlights: ["Eine der größten Stiftungen Europas", "Über 300 Projekte jährlich", "Finanziert u.a. IMMPACT"], impact: [{ num: "300+", label: "Projekte jährlich" }, { num: "70+", label: "Länder" }, { num: "380", label: "Mitarbeitende" }], quote: "Gesellschaftlicher Wandel braucht Evidenz, Dialog und den Mut zur Umsetzung.", longDesc: "Die Bertelsmann Stiftung gehört zu den größten operativen Stiftungen Europas und arbeitet an der Schnittstelle von Forschung und gesellschaftlicher Praxis." },
+      23: { highlights: ["Klimaneutraler Firmensitz seit 2012", "EMAS-zertifiziert", "Gemeinwohl-Bilanz seit 2016"], impact: [{ num: "2012", label: "Klimaneutral seit" }, { num: "90%", label: "Nachhaltige Produkte" }, { num: "1.800", label: "Mitarbeitende" }], quote: "Wirtschaft muss dem Menschen dienen – nicht umgekehrt.", longDesc: "Vaude ist der Beweis, dass ein mittelständisches Unternehmen gleichzeitig wirtschaftlich erfolgreich und konsequent nachhaltig sein kann." },
+      27: { highlights: ["Betreiber der Impact Collective Plattform", "Über 400 analysierte NGOs", "Wirkt-Siegel als Qualitätsstandard"], impact: [{ num: "400+", label: "Geprüfte Organisationen" }, { num: "60+", label: "Mitarbeitende" }, { num: "15+", label: "Jahre Wirkungsanalyse" }], quote: "Für mehr Wirkung. Überall.", longDesc: "PHINEO ist das Analyse- und Beratungshaus für gesellschaftliches Engagement in Deutschland. Mit der Impact Collective Plattform geht PHINEO den nächsten Schritt: von der Analyse hin zur intelligenten Vernetzung des gesamten Impact-Ökosystems." },
+      34: { highlights: ["Börsennotierter deutscher Impact Investor (WKN: A3DW40)", "Wissenschaftsbasiertes Impact-Assessment mit THE SEVENTEEN Netzwerk", "Veranstalter des International Impact Forum (Frankfurt, Wien, Abu Dhabi)", "Vorstand: Ole Nixdorff (CEO) und Dr. Andreas Rickert (PHINEO)"], impact: [{ num: "4", label: "Portfolio-Unternehmen" }, { num: "25+", label: "Impact-Score Minimum" }, { num: "3", label: "Int. Impact Forum Standorte" }], quote: "Die Zukunft des Geldes ist Nachhaltigkeit.", longDesc: "Die DN Deutsche Nachhaltigkeit AG ist ein börsennotierter Impact Investor mit Sitz im Frankfurter Opernturm. Als Ankerinvestor beteiligt sich DN mit Eigenkapital an ausgewählten Nachhaltigkeitsunternehmen und begleitet sie strategisch auf dem Weg zur Kapitalmarktfähigkeit. Das Impact-Assessment basiert auf einer wissenschaftlichen Methodik, entwickelt mit dem THE SEVENTEEN Netzwerk und der CBS International Business School. Portfolio-Unternehmen wie Algene, Susmata, Eco Motion und Soapeya werden nicht nur finanziell, sondern auch bei der Entwicklung marktreifer Geschäftsmodelle unterstützt. Mit dem International Impact Forum bringt DN regelmäßig globale Leader aus Impact Investing und nachhaltiger Finanzierung zusammen.", video: { id: "3xIbycMaGi4", title: "Neue Deutsche Nachhaltigkeit – Der Podcast" } },
+    };
+
+    // KI-Matching: Vordefinierte Szenarien
+    const matchingScenarios = [
+      {
+        id: "climate",
+        keywords: ["climate", "klima", "co2", "carbon", "energie", "energy", "funding", "invest", "startup", "climate-tech", "cleantech", "projekte", "portfolio", "finanzierung"],
+        chipLabel: "Funding für mein Climate-Tech Startup",
+        aiIntro: "Basierend auf deinem Climate-Tech-Fokus habe ich das Impact Collective Netzwerk analysiert und diese besonders relevanten Partner identifiziert:",
+        matches: [
+          { actorId: 10, score: 96, reason: "World Fund investiert gezielt in Climate-Tech-Startups mit CO₂-Einsparungspotenzial ab 100 Mt. Mit 350 Mio. EUR Fondsvolumen einer der aktivsten Klimainvestoren Europas — idealer Lead-Investor für Wachstumsfinanzierung." },
+          { actorId: 5, score: 91, reason: "PHLAIR arbeitet ebenfalls im Bereich CO₂-Reduktion und hat bereits Erfahrung mit EU-Förderung (EIC). Potenzial für technologische Kooperationen und gemeinsame Pilotprojekte." },
+          { actorId: 9, score: 87, reason: "Klim verbindet Landwirtschaft mit CO₂-Kompensation und hat ein erprobtes B2B-Modell. Synergien bei der Vermarktung von CO₂-Zertifikaten und gemeinsamen Unternehmenskunden." },
+          { actorId: 11, score: 82, reason: "ANANDA Impact Ventures ist einer der Pioniere im europäischen Impact Investing mit über 40 Portfolio-Unternehmen. Bringt operatives Know-how und Netzwerk in der Impact-Szene mit." },
+        ],
+      },
+      {
+        id: "bildung",
+        keywords: ["bildung", "education", "schule", "school", "lernen", "kinder", "jugend", "ngo", "partner", "teach", "sozial"],
+        chipLabel: "NGO-Partner für Bildungsprojekt",
+        aiIntro: "Für dein Bildungsprojekt habe ich Akteure identifiziert, die im Bereich SDG 4 (Hochwertige Bildung) aktiv sind und komplementäre Stärken mitbringen:",
+        matches: [
+          { actorId: 3, score: 94, reason: "Teach First Deutschland setzt Hochschulabsolvent*innen als Fellows an Brennpunktschulen ein. Starkes operatives Netzwerk an 130+ Schulen — idealer Umsetzungspartner für Bildungsinnovationen." },
+          { actorId: 18, score: 90, reason: "Die Bertelsmann Stiftung finanziert evidenzbasierte Bildungsreformen und bringt Zugang zu politischen Entscheidungsträgern. Kann Skalierung durch Forschungsbegleitung und Policy-Arbeit unterstützen." },
+          { actorId: 27, score: 85, reason: "PHINEO analysiert seit 15+ Jahren die Wirksamkeit von Bildungsprogrammen. Kann bei Wirkungsmessung und dem Wirkt-Siegel als Qualitätsnachweis helfen." },
+          { actorId: 20, score: 80, reason: "Die Schöpflin Stiftung fördert zivilgesellschaftliche Innovation mit Fokus auf Lernen und Partizipation. Passt als Förderer für partizipative Bildungsformate." },
+        ],
+      },
+      {
+        id: "digital",
+        keywords: ["digital", "hass", "hate", "netz", "online", "demokratie", "gesellschaft", "zivilgesellschaft", "social enterprise", "vernetzung", "politik"],
+        chipLabel: "Politische Vernetzung für Social Enterprise",
+        aiIntro: "Für politische Vernetzung und digitale Zivilgesellschaft habe ich diese Akteure im Netzwerk identifiziert, die komplementäre Zugänge und Erfahrung mitbringen:",
+        matches: [
+          { actorId: 33, score: 93, reason: "Anna-Lena von Hodenberg (HateAid) ist eine der bekanntesten Stimmen gegen digitale Gewalt. Bundesverdienstkreuz-Trägerin mit direktem Zugang zur Bundespolitik und EU-Ebene." },
+          { actorId: 2, score: 88, reason: "#ichbinhier mobilisiert 39.000 Mitglieder für digitale Zivilcourage. Starke Community-Expertise und Erfahrung in der Skalierung von digitalem Engagement." },
+          { actorId: 29, score: 86, reason: "SEND e.V. vertritt über 800 Sozialunternehmen politisch und hat Social Entrepreneurship auf die Bundesagenda gebracht. Direkter Draht ins BMWK und in Länderministerien." },
+          { actorId: 28, score: 83, reason: "ProjectTogether baut Brücken zwischen Innovation und Verwaltung. Hat mit dem UpdateDeutschland-Hackathon gezeigt, wie zivilgesellschaftliche Lösungen in staatliche Strukturen kommen." },
+        ],
+      },
+      {
+        id: "kreislauf",
+        keywords: ["kreislauf", "circular", "recycling", "bauen", "bau", "material", "ressource", "konsum", "produktion", "impact-messung", "wirkungsmessung"],
+        chipLabel: "Impact-Messung für unser Portfolio",
+        aiIntro: "Für Kreislaufwirtschaft und nachhaltige Wertschöpfung habe ich diese besonders passenden Akteure gefunden:",
+        matches: [
+          { actorId: 8, score: 95, reason: "Concular digitalisiert die Wiederverwendung von Baumaterialien und macht Gebäude zu Rohstofflagern. Pionier im zirkulären Bauen mit konkreten Projekten wie der ICE City Erfurt." },
+          { actorId: 30, score: 89, reason: "Circular Republic ist die führende Plattform für Kreislaufwirtschaft in Deutschland, gegründet von UnternehmerTUM. Bringt Zugang zu Corporates und ein starkes Forschungsnetzwerk." },
+          { actorId: 23, score: 84, reason: "Vaude zeigt seit Jahren, dass Kreislaufwirtschaft im Mittelstand funktioniert. Klimaneutraler Firmensitz, EMAS-zertifiziert, Gemeinwohl-Bilanz — ein Leuchtturm als Referenzpartner." },
+          { actorId: 27, score: 79, reason: "PHINEO kann die Wirkungsmessung eurer Kreislaufwirtschafts-Projekte begleiten und mit dem Wirkt-Siegel einen anerkannten Qualitätsnachweis liefern." },
+        ],
+      },
+    ];
+
+    function findMatchingScenario(query) {
+      const q = query.toLowerCase();
+      let bestMatch = null;
+      let bestScore = 0;
+      matchingScenarios.forEach((scenario) => {
+        const score = scenario.keywords.filter((kw) => q.includes(kw)).length;
+        if (score > bestScore) { bestScore = score; bestMatch = scenario; }
+      });
+      return bestMatch || matchingScenarios[0];
+    }
+
+    function MatchingView({ onBack, onSelectActor, initialQuery, onGoToFunding, onGoToInvestor }) {
+      const [messages, setMessages] = useState([]);
+      const [inputValue, setInputValue] = useState("");
+      const [phase, setPhase] = useState("input"); // input | thinking | results
+      const [currentScenario, setCurrentScenario] = useState(null);
+      const [visibleMatches, setVisibleMatches] = useState(0);
+      const chatEndRef = useRef(null);
+
+      useEffect(() => {
+        if (initialQuery) {
+          handleSubmit(initialQuery);
+        }
+      }, []);
+
+      useEffect(() => {
+        if (chatEndRef.current) {
+          chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+      }, [messages, phase, visibleMatches]);
+
+      useEffect(() => {
+        if (phase === "thinking") {
+          const timer = setTimeout(() => {
+            const scenario = findMatchingScenario(messages[messages.length - 1]?.text || "");
+            setCurrentScenario(scenario);
+            setMessages((prev) => [...prev, { type: "ai", text: scenario.aiIntro }]);
+            setPhase("results");
+            setVisibleMatches(0);
+          }, 2000);
+          return () => clearTimeout(timer);
+        }
+      }, [phase]);
+
+      useEffect(() => {
+        if (phase === "results" && currentScenario && visibleMatches < currentScenario.matches.length) {
+          const timer = setTimeout(() => {
+            setVisibleMatches((v) => v + 1);
+          }, 400);
+          return () => clearTimeout(timer);
+        }
+      }, [phase, visibleMatches, currentScenario]);
+
+      function handleSubmit(text) {
+        const query = text || inputValue;
+        if (!query.trim()) return;
+        setMessages((prev) => [...prev, { type: "user", text: query }]);
+        setInputValue("");
+        setPhase("thinking");
+      }
+
+      function handleNewSearch() {
+        setMessages([]);
+        setPhase("input");
+        setCurrentScenario(null);
+        setVisibleMatches(0);
+      }
+
+      const chips = matchingScenarios.map((s) => s.chipLabel);
+
+      return (
+        <div className="min-h-screen" style={{ backgroundColor: "#FAFBFB" }}>
+          <Header onBack={onBack} onGoHome={onBack} />
+
+          <section className="relative overflow-hidden" style={{ background: "linear-gradient(170deg, #20383A 0%, #2a4a4d 40%, #365F63 100%)" }}>
+            <div className="max-w-4xl mx-auto px-6 py-12 md:py-16 relative z-10 text-center">
+              <div className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-6" style={{ backgroundColor: "#45B4C6", color: "#20383A" }}>KI-Matching</div>
+              <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight" style={{ fontFamily: "Georgia, serif" }}>Finde die richtigen<br/><span style={{ color: "#67DE93" }}>Partner.</span></h1>
+              <p className="text-lg mt-4 max-w-2xl mx-auto" style={{ color: "rgba(255,255,255,0.7)" }}>Beschreibe, was du suchst — unsere KI analysiert das Netzwerk und schlägt die besten Matches vor.</p>
+            </div>
+            <div className="absolute -right-32 -top-16 w-96 h-96 rounded-full" style={{ backgroundColor: "#45B4C6", opacity: 0.08 }} />
+            <div className="absolute left-10 bottom-0 w-64 h-64 rounded-full" style={{ backgroundColor: "#67DE93", opacity: 0.06 }} />
+          </section>
+
+          <div className="max-w-4xl mx-auto px-6 pt-10 pb-4">
+            <div className="rounded-3xl overflow-hidden relative mb-8" style={{ background: "linear-gradient(135deg, #20383A 0%, #2a4a4d 50%, #1a5276 100%)" }}>
+              <div className="px-10 py-12 md:px-14 md:py-14 flex flex-col gap-8 relative z-10">
+                <div className="flex items-center gap-5">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#D4A843" }}>
+                    <svg className="w-8 h-8" fill="white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl md:text-3xl font-bold text-white" style={{ fontFamily: "Georgia, serif" }}>Startups & Investoren</h3>
+                    <p className="text-sm md:text-base mt-2" style={{ color: "rgba(255,255,255,0.65)" }}>Gezieltes Matching zwischen Kapitalgebern und Impact-Startups — finde den richtigen Partner für dein Vorhaben.</p>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button onClick={() => onGoToFunding && onGoToFunding()} className="px-8 py-4 rounded-full font-semibold text-sm transition-all hover:opacity-90 whitespace-nowrap" style={{ backgroundColor: "#67DE93", color: "#20383A", border: "none", cursor: "pointer" }}>
+                    Du bist Startup & suchst Funding? →
+                  </button>
+                  <button onClick={() => onGoToInvestor && onGoToInvestor()} className="px-8 py-4 rounded-full font-semibold text-sm text-white hover:border-white/60 transition-all whitespace-nowrap" style={{ border: "2px solid rgba(255,255,255,0.3)", background: "transparent", cursor: "pointer" }}>
+                    Du bist Investor & scoutest Startups? →
+                  </button>
+                </div>
+              </div>
+              <div className="absolute -right-12 -top-12 w-56 h-56 rounded-full" style={{ backgroundColor: "#D4A843", opacity: 0.08 }} />
+              <div className="absolute left-1/4 -bottom-10 w-40 h-40 rounded-full" style={{ backgroundColor: "#67DE93", opacity: 0.06 }} />
+            </div>
+          </div>
+
+          <div className="max-w-3xl mx-auto px-6 pb-10">
+            {/* Chat-Verlauf */}
+            <div className="space-y-6 mb-8">
+              {messages.map((msg, i) => (
+                <div key={i} className={"flex " + (msg.type === "user" ? "justify-end" : "justify-start")}>
+                  {msg.type === "ai" && (
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-1" style={{ backgroundColor: "#45B4C6" }}>
+                      <svg className="w-4 h-4" fill="white" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    </div>
+                  )}
+                  <div className={"max-w-md rounded-2xl px-5 py-3 " + (msg.type === "user" ? "text-white" : "")}
+                    style={msg.type === "user" ? { backgroundColor: "#20383A" } : { backgroundColor: "#F0F7F8", color: "#20383A" }}>
+                    <p className="text-sm leading-relaxed">{msg.text}</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Thinking Animation */}
+              {phase === "thinking" && (
+                <div className="flex justify-start">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-3 mt-1" style={{ backgroundColor: "#45B4C6" }}>
+                    <svg className="w-4 h-4" fill="white" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                  </div>
+                  <div className="rounded-2xl px-5 py-4" style={{ backgroundColor: "#F0F7F8" }}>
+                    <div className="flex items-center gap-3">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#45B4C6", animation: "pulse 1.4s ease-in-out infinite" }} />
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#45B4C6", animation: "pulse 1.4s ease-in-out 0.2s infinite" }} />
+                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#45B4C6", animation: "pulse 1.4s ease-in-out 0.4s infinite" }} />
+                      </div>
+                      <span className="text-xs" style={{ color: "#6CBDC6" }}>Analysiere 693 Akteure im Netzwerk...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Ergebnis-Karten */}
+              {phase === "results" && currentScenario && (
+                <div className="space-y-4">
+                  {currentScenario.matches.slice(0, visibleMatches).map((match, i) => {
+                    const actor = actors.find((a) => a.id === match.actorId);
+                    if (!actor) return null;
+                    const colors = categoryColors[actor.category];
+                    const imageUrl = actorImages[actor.id];
+                    return (
+                      <div key={match.actorId} className="rounded-2xl overflow-hidden bg-white border border-gray-100 hover:shadow-lg transition-all cursor-pointer group"
+                        style={{ animation: "fadeSlideUp 0.5s ease-out" }}
+                        onClick={() => onSelectActor(actor)}>
+                        <div className="flex flex-col sm:flex-row">
+                          <div className="sm:w-40 h-32 sm:h-auto relative flex-shrink-0" style={{ background: actor.image }}>
+                            {imageUrl && <img src={imageUrl} alt={actor.name} className="absolute inset-0 w-full h-full object-cover" style={Object.assign({}, actor.category === "personen" ? { objectPosition: "center 15%" } : {}, actorImageStyles[actor.id] || {})} onError={(e) => { e.target.style.display = "none"; }} />}
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/10" />
+                            <div className="absolute top-3 left-3">
+                              <div className="px-3 py-1 rounded-full text-xs font-bold text-white" style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}>
+                                {match.score}% Match
+                              </div>
+                            </div>
+                          </div>
+                          <div className="p-5 flex-1">
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <CategoryBadge category={actor.category} />
+                                </div>
+                                <h3 className="text-lg font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>{actor.name}</h3>
+                                <p className="text-xs mt-0.5" style={{ color: "#6CBDC6" }}>{actor.tagline}</p>
+                              </div>
+                              <div className="flex-shrink-0 hidden sm:block">
+                                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: match.score >= 90 ? "#67DE93" : match.score >= 80 ? "#45B4C6" : "#6CBDC6", color: "white", fontFamily: "Georgia, serif", fontWeight: "bold", fontSize: "14px" }}>
+                                  {match.score}%
+                                </div>
+                              </div>
+                            </div>
+                            <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: "#F6F8F8" }}>
+                              <div className="flex items-start gap-2">
+                                <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="#45B4C6" strokeWidth="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                                <p className="text-sm leading-relaxed" style={{ color: "#365F63" }}>{match.reason}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4 mt-3">
+                              <span className="text-xs font-medium group-hover:translate-x-1 transition-transform inline-flex items-center gap-1" style={{ color: "#45B4C6" }}>
+                                Profil ansehen
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                              </span>
+                              <button className="text-xs font-medium px-3 py-1 rounded-full transition-all hover:opacity-80" style={{ backgroundColor: "#67DE93", color: "#20383A", border: "none", cursor: "pointer" }} onClick={(e) => { e.stopPropagation(); }}>
+                                Kontakt anfragen
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Neue Suche nach Ergebnissen */}
+              {phase === "results" && currentScenario && visibleMatches >= currentScenario.matches.length && (
+                <div className="text-center pt-4">
+                  <button onClick={handleNewSearch} className="px-6 py-2.5 rounded-full text-sm font-medium transition-all hover:opacity-80" style={{ border: "1px solid #45B4C6", color: "#45B4C6", background: "transparent", cursor: "pointer" }}>
+                    Neue Suche starten
+                  </button>
+                </div>
+              )}
+
+              <div ref={chatEndRef} />
+            </div>
+
+            {/* Eingabebereich */}
+            {phase === "input" && (
+              <div>
+                {messages.length === 0 && (
+                  <div className="mb-6">
+                    <p className="text-sm font-medium mb-3" style={{ color: "#6CBDC6" }}>Oder starte mit einem Vorschlag:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {chips.map((chip) => (
+                        <button key={chip} onClick={() => handleSubmit(chip)}
+                          className="px-4 py-2 rounded-full text-sm transition-all hover:shadow-md"
+                          style={{ backgroundColor: "#F0F7F8", color: "#20383A", border: "1px solid #e0ecee", cursor: "pointer" }}>
+                          {chip}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
+                    placeholder="Beschreibe, was du suchst..."
+                    className="flex-1 px-5 py-3.5 rounded-full text-sm border focus:outline-none focus:ring-2 transition-all"
+                    style={{ borderColor: "#e0ecee", focusRingColor: "#45B4C6" }}
+                  />
+                  <button onClick={() => handleSubmit()} className="px-6 py-3.5 rounded-full text-sm font-semibold text-white transition-all hover:opacity-90" style={{ backgroundColor: "#45B4C6", border: "none", cursor: "pointer" }}>
+                    Suchen
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Footer />
+        </div>
+      );
+    }
+
+    const fundingMatches = [
+      {
+        actorId: 34,
+        name: "Deutsche Nachhaltigkeit AG",
+        score: 93,
+        reasons: [
+          "Expliziter Impact-Fokus auf Nachhaltigkeit und ESG-konforme Investments",
+          "Investiert in Climate-Tech und wachstumsstarke Unternehmen mit Nachhaltigkeitsprofil",
+          "Zugang zu internationalen institutionellen Investoren über Kapitalmarkt-Expertise"
+        ],
+        exclusion: "DN fokussiert auf Unternehmen nahe IPO-Reife. AUARs Seed-Stage könnte zu früh sein — allerdings besteht die Möglichkeit einer früheren Beteiligung über ihr Advisory-Programm.",
+        contact: "Investment Team, Deutsche Nachhaltigkeit AG",
+      },
+      {
+        actorId: 10,
+        name: "World Fund",
+        score: 89,
+        reasons: [
+          "Größter europäischer Climate-Tech-VC mit 350 Mio. EUR Fondsvolumen",
+          "Passt zu AUARs CO₂-Einsparung durch nachhaltiges Bauen (SDG 13)",
+          "Sucht Startups mit 100+ Mt CO₂-Einsparungspotenzial"
+        ],
+        exclusion: "World Fund investiert typischerweise ab Series A. Für Seed-Runden könnte das Timing noch nicht passen — ein frühes Kennenlernen wäre dennoch strategisch wertvoll.",
+        contact: "Daria Saharova, Partner bei World Fund",
+      },
+      {
+        actorId: 21,
+        name: "Reimann Investors",
+        score: 82,
+        reasons: [
+          "Family Office mit Impact-orientierter Langfristperspektive",
+          "Investiert in nachhaltige Frühphasen-Unternehmen",
+          "Passt zur Vision von systemischem Wandel in der Bauindustrie"
+        ],
+        exclusion: "Reimann Investors hat bisher keinen öffentlichen Fokus auf Construction Tech. Erste Gespräche wären explorativer Natur.",
+        contact: "Investment Relations, Reimann Investors",
+      },
+    ];
+
+    function FundingFlowView({ onBack }) {
+      const [step, setStep] = useState(1);
+      const [email, setEmail] = useState("gilles@auar.com");
+      const [password, setPassword] = useState("House2026!");
+      const [uploadDone, setUploadDone] = useState(false);
+      const [analyzing, setAnalyzing] = useState(false);
+      const [pitchAnalyzed, setPitchAnalyzed] = useState(false);
+      const [searchingMatches, setSearchingMatches] = useState(false);
+      const [matchesVisible, setMatchesVisible] = useState(0);
+      const [selectedIntro, setSelectedIntro] = useState(null);
+      const [introSent, setIntroSent] = useState(false);
+      const [fundingType, setFundingType] = useState("Seed");
+      const [fundingAmount, setFundingAmount] = useState("1.000.000");
+      const [fundingRegion, setFundingRegion] = useState("DACH / Europa");
+
+      useEffect(() => {
+        if (analyzing) {
+          const t = setTimeout(() => { setAnalyzing(false); setPitchAnalyzed(true); }, 2500);
+          return () => clearTimeout(t);
+        }
+      }, [analyzing]);
+
+      useEffect(() => {
+        if (searchingMatches) {
+          const t = setTimeout(() => { setSearchingMatches(false); setStep(5); setMatchesVisible(0); }, 2500);
+          return () => clearTimeout(t);
+        }
+      }, [searchingMatches]);
+
+      useEffect(() => {
+        if (step === 5 && matchesVisible < fundingMatches.length) {
+          const t = setTimeout(() => setMatchesVisible((v) => v + 1), 500);
+          return () => clearTimeout(t);
+        }
+      }, [step, matchesVisible]);
+
+      function handleUploadClick() {
+        setUploadDone(true);
+        setTimeout(() => setAnalyzing(true), 600);
+      }
+
+      function handleFindMatches() {
+        setSearchingMatches(true);
+      }
+
+      // Step indicator
+      const steps = ["Login", "Profil", "Pitchdeck", "Kriterien", "Matches", "Intro"];
+      const StepIndicator = () => (
+        <div className="flex items-center justify-center gap-1 mb-8">
+          {steps.map((s, i) => (
+            <React.Fragment key={i}>
+              <div className={"flex items-center justify-center rounded-full text-xs font-bold transition-all " + (i + 1 <= step ? "text-white" : "text-gray-400")}
+                style={{ width: "32px", height: "32px", backgroundColor: i + 1 < step ? "#67DE93" : i + 1 === step ? "#45B4C6" : "#e5e7eb" }}>
+                {i + 1 < step ? "✓" : i + 1}
+              </div>
+              {i < steps.length - 1 && <div className="w-6 h-0.5" style={{ backgroundColor: i + 1 < step ? "#67DE93" : "#e5e7eb" }} />}
+            </React.Fragment>
+          ))}
+        </div>
+      );
+
+      return (
+        <div className="min-h-screen" style={{ backgroundColor: "#FAFBFB" }}>
+          <Header onBack={onBack} onGoHome={onBack} />
+
+          {/* Step 1: Login */}
+          {step === 1 && (
+            <div className="max-w-md mx-auto px-6 py-16">
+              <StepIndicator />
+              <div className="text-center mb-8">
+                <div className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4" style={{ backgroundColor: "#45B4C6", color: "#20383A" }}>KI-Matching</div>
+                <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Willkommen zurück</h1>
+                <p className="text-sm mt-2" style={{ color: "#6CBDC6" }}>Melde dich an, um dein personalisiertes Matching zu starten.</p>
+              </div>
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>E-Mail</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm focus:outline-none focus:ring-2" style={{ borderColor: "#e0ecee" }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Passwort</label>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm focus:outline-none focus:ring-2" style={{ borderColor: "#e0ecee" }} />
+                  </div>
+                  <button onClick={() => { setStep(2); window.scrollTo(0, 0); }} className="w-full py-3 rounded-full font-semibold text-sm text-white transition-all hover:opacity-90 mt-2" style={{ backgroundColor: "#45B4C6", border: "none", cursor: "pointer" }}>
+                    Anmelden →
+                  </button>
+                </div>
+                <p className="text-center text-xs mt-4" style={{ color: "#999" }}>Noch kein Konto? <span style={{ color: "#45B4C6", cursor: "pointer" }}>Registrieren</span></p>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: AUAR Profil */}
+          {step === 2 && (
+            <div>
+              <div className="relative h-56 md:h-72" style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #2d4a7a 100%)" }}>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 max-w-4xl mx-auto">
+                  <div className="flex items-end gap-5">
+                    <div className="flex-shrink-0 rounded-2xl shadow-xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.95)", width: "64px", height: "64px" }}>
+                      <img src="https://www.google.com/s2/favicons?domain=auar.io&sz=128" alt="AUAR" className="w-9 h-9 object-contain" />
+                    </div>
+                    <div>
+                      <span className="inline-block px-3 py-1 text-xs font-semibold tracking-wide uppercase rounded-full text-white" style={{ backgroundColor: "#67DE93", color: "#20383A" }}>Dein Unternehmen</span>
+                      <h1 className="text-4xl md:text-5xl font-bold text-white mt-2" style={{ fontFamily: "Georgia, serif" }}>AUAR</h1>
+                      <p className="text-lg text-white/80 mt-1" style={{ fontFamily: "Georgia, serif" }}>Automated Architecture</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="max-w-4xl mx-auto px-6 md:px-12 py-10">
+                <StepIndicator />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="md:col-span-2 space-y-6">
+                    <div>
+                      <h2 className="text-xl font-bold mb-3" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Über AUAR</h2>
+                      <p className="text-sm leading-relaxed" style={{ color: "#365F63" }}>AUAR (Automated Architecture) entwickelt KI-gesteuerte Roboter-Mikrofabriken, die nachhaltige Holzrahmenhäuser in unter 12 Stunden produzieren. Die Technologie kombiniert künstliche Intelligenz mit robotergestützter Fertigung, um den Wohnungsbau schneller, günstiger und nachhaltiger zu machen. AUAR expandiert aktuell von UK in die USA und nach Europa.</p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center p-4 rounded-xl" style={{ backgroundColor: "#F0F7F8" }}>
+                        <div className="text-2xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>£5.1M+</div>
+                        <div className="text-xs mt-1" style={{ color: "#6CBDC6" }}>Bereits raised</div>
+                      </div>
+                      <div className="text-center p-4 rounded-xl" style={{ backgroundColor: "#F0F7F8" }}>
+                        <div className="text-2xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>&lt;12h</div>
+                        <div className="text-xs mt-1" style={{ color: "#6CBDC6" }}>Pro Haus</div>
+                      </div>
+                      <div className="text-center p-4 rounded-xl" style={{ backgroundColor: "#F0F7F8" }}>
+                        <div className="text-2xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>-80%</div>
+                        <div className="text-xs mt-1" style={{ color: "#6CBDC6" }}>CO₂ vs. konventionell</div>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "#6CBDC6" }}>Sustainable Development Goals</h3>
+                      <div className="flex gap-2">
+                        {["11", "13", "8"].map((sdg) => (
+                          <div key={sdg} className="rounded-lg overflow-hidden" style={{ width: "56px", height: "56px", backgroundColor: sdgData[sdg].color }}>
+                            {sdgIconUrls[sdg] ? <img src={sdgIconUrls[sdg]} alt={"SDG " + sdg} className="w-full h-full object-cover" /> : <div className="p-2 text-white font-bold">{sdg}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="rounded-2xl p-5" style={{ backgroundColor: "#F6F8F8" }}>
+                      <div className="space-y-3 text-sm">
+                        <div><span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#6CBDC6" }}>Gründer</span><p className="font-medium mt-0.5" style={{ color: "#20383A" }}>Gilles Retsin (CTO)</p></div>
+                        <div><span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#6CBDC6" }}>Standort</span><p className="font-medium mt-0.5" style={{ color: "#20383A" }}>Bristol / London, UK</p></div>
+                        <div><span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#6CBDC6" }}>Gegründet</span><p className="font-medium mt-0.5" style={{ color: "#20383A" }}>2020</p></div>
+                        <div><span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#6CBDC6" }}>Branche</span><p className="font-medium mt-0.5" style={{ color: "#20383A" }}>Construction Tech / Climate Tech</p></div>
+                      </div>
+                    </div>
+                    <button onClick={() => { setStep(3); window.scrollTo(0, 0); }} className="w-full py-3 rounded-full font-semibold text-sm transition-all hover:opacity-90" style={{ backgroundColor: "#67DE93", color: "#20383A", border: "none", cursor: "pointer" }}>
+                      Weiter zum Matching →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Pitchdeck Upload */}
+          {step === 3 && (
+            <div className="max-w-2xl mx-auto px-6 py-16">
+              <StepIndicator />
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Pitchdeck hochladen</h1>
+                <p className="text-sm mt-2" style={{ color: "#6CBDC6" }}>Unsere KI analysiert dein Pitchdeck, um die besten Matches zu finden.</p>
+              </div>
+
+              {!uploadDone ? (
+                <div onClick={handleUploadClick} className="border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer hover:border-opacity-60 transition-all" style={{ borderColor: "#45B4C6" }}>
+                  <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="#45B4C6" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
+                  <p className="font-semibold" style={{ color: "#20383A" }}>Pitchdeck hier ablegen oder klicken</p>
+                  <p className="text-xs mt-1" style={{ color: "#999" }}>PDF, PPTX · max. 50 MB</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="bg-white rounded-2xl p-6 border border-gray-100 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#fee2e2" }}>
+                      <svg className="w-6 h-6" fill="#ef4444" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM14 8V2l6 6h-6z"/></svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm" style={{ color: "#20383A" }}>AUAR_Pitchdeck_2026.pdf</p>
+                      <p className="text-xs" style={{ color: "#999" }}>4.2 MB · Hochgeladen</p>
+                    </div>
+                    <svg className="w-6 h-6" fill="#67DE93" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                  </div>
+
+                  {analyzing && (
+                    <div className="bg-white rounded-2xl p-6 border border-gray-100">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="flex gap-1">
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#45B4C6", animation: "pulse 1.4s ease-in-out infinite" }} />
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#45B4C6", animation: "pulse 1.4s ease-in-out 0.2s infinite" }} />
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#45B4C6", animation: "pulse 1.4s ease-in-out 0.4s infinite" }} />
+                        </div>
+                        <span className="text-sm font-medium" style={{ color: "#45B4C6" }}>KI analysiert Pitchdeck...</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-2 rounded-full" style={{ backgroundColor: "#F0F7F8", width: "100%" }}><div className="h-2 rounded-full" style={{ backgroundColor: "#45B4C6", width: "65%", animation: "pulse 2s ease-in-out infinite" }} /></div>
+                      </div>
+                    </div>
+                  )}
+
+                  {pitchAnalyzed && (
+                    <div className="bg-white rounded-2xl p-6 border border-gray-100" style={{ animation: "fadeSlideUp 0.5s ease-out" }}>
+                      <div className="flex items-center gap-2 mb-4">
+                        <svg className="w-5 h-5" fill="#67DE93" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                        <span className="text-sm font-semibold" style={{ color: "#20383A" }}>Analyse abgeschlossen</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="p-3 rounded-lg" style={{ backgroundColor: "#F0F7F8" }}>
+                          <span className="text-xs font-semibold uppercase" style={{ color: "#6CBDC6" }}>Branche</span>
+                          <p className="font-medium mt-0.5" style={{ color: "#20383A" }}>Construction Tech</p>
+                        </div>
+                        <div className="p-3 rounded-lg" style={{ backgroundColor: "#F0F7F8" }}>
+                          <span className="text-xs font-semibold uppercase" style={{ color: "#6CBDC6" }}>Stage</span>
+                          <p className="font-medium mt-0.5" style={{ color: "#20383A" }}>Seed / Pre-Series A</p>
+                        </div>
+                        <div className="p-3 rounded-lg" style={{ backgroundColor: "#F0F7F8" }}>
+                          <span className="text-xs font-semibold uppercase" style={{ color: "#6CBDC6" }}>CO₂-Reduktion</span>
+                          <p className="font-medium mt-0.5" style={{ color: "#20383A" }}>80% vs. konventionell</p>
+                        </div>
+                        <div className="p-3 rounded-lg" style={{ backgroundColor: "#F0F7F8" }}>
+                          <span className="text-xs font-semibold uppercase" style={{ color: "#6CBDC6" }}>Bisheriges Funding</span>
+                          <p className="font-medium mt-0.5" style={{ color: "#20383A" }}>£5.1M+</p>
+                        </div>
+                      </div>
+                      <button onClick={() => { setStep(4); window.scrollTo(0, 0); }} className="w-full py-3 rounded-full font-semibold text-sm transition-all hover:opacity-90 mt-6" style={{ backgroundColor: "#67DE93", color: "#20383A", border: "none", cursor: "pointer" }}>
+                        Weiter →
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 4: Suchkriterien */}
+          {step === 4 && (
+            <div className="max-w-2xl mx-auto px-6 py-16">
+              <StepIndicator />
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Suchkriterien</h1>
+                <p className="text-sm mt-2" style={{ color: "#6CBDC6" }}>Die Grunddaten haben wir aus deinem Pitchdeck übernommen. Passe sie bei Bedarf an.</p>
+              </div>
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-5">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Funding-Art</label>
+                  <select value={fundingType} onChange={(e) => setFundingType(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm" style={{ borderColor: "#e0ecee" }}>
+                    <option>Pre-Seed</option><option>Seed</option><option>Series A</option><option>Series B+</option><option>Grant / Förderung</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Gesuchter Betrag (EUR)</label>
+                  <input type="text" value={fundingAmount} onChange={(e) => setFundingAmount(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm" style={{ borderColor: "#e0ecee" }} />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Branche (aus Pitchdeck)</label>
+                  <input type="text" value="Construction Tech / Climate Tech" readOnly className="w-full px-4 py-3 rounded-lg border text-sm bg-gray-50" style={{ borderColor: "#e0ecee", color: "#999" }} />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Region</label>
+                  <select value={fundingRegion} onChange={(e) => setFundingRegion(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm" style={{ borderColor: "#e0ecee" }}>
+                    <option>DACH / Europa</option><option>Europa</option><option>Global</option><option>Nur Deutschland</option>
+                  </select>
+                </div>
+                <button onClick={handleFindMatches} className="w-full py-3 rounded-full font-semibold text-sm text-white transition-all hover:opacity-90 mt-2" style={{ backgroundColor: "#45B4C6", border: "none", cursor: "pointer" }}>
+                  Matches finden →
+                </button>
+              </div>
+
+              {searchingMatches && (
+                <div className="mt-8 text-center">
+                  <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl" style={{ backgroundColor: "#F0F7F8" }}>
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#45B4C6", animation: "pulse 1.4s ease-in-out infinite" }} />
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#45B4C6", animation: "pulse 1.4s ease-in-out 0.2s infinite" }} />
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#45B4C6", animation: "pulse 1.4s ease-in-out 0.4s infinite" }} />
+                    </div>
+                    <span className="text-sm font-medium" style={{ color: "#45B4C6" }}>Analysiere 85 Kapitalgeber im Netzwerk...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 5: Ergebnisse */}
+          {step === 5 && !selectedIntro && (
+            <div className="max-w-3xl mx-auto px-6 py-16">
+              <StepIndicator />
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Deine Matches</h1>
+                <p className="text-sm mt-2" style={{ color: "#6CBDC6" }}>Basierend auf deinem Pitchdeck und Suchkriterien: {fundingType}, {fundingAmount} EUR, {fundingRegion}</p>
+              </div>
+              <div className="space-y-6">
+                {fundingMatches.slice(0, matchesVisible).map((match, i) => {
+                  const actor = actors.find((a) => a.id === match.actorId);
+                  const imageUrl = actor ? actorImages[actor.id] : null;
+                  return (
+                    <div key={match.actorId} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm" style={{ animation: "fadeSlideUp 0.5s ease-out" }}>
+                      <div className="flex flex-col sm:flex-row">
+                        <div className="sm:w-44 h-32 sm:h-auto relative flex-shrink-0" style={{ background: actor ? actor.image : "linear-gradient(135deg, #20383A 0%, #45B4C6 100%)" }}>
+                          {imageUrl && <img src={imageUrl} alt={match.name} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.target.style.display = "none"; }} />}
+                          <div className="absolute top-3 left-3">
+                            <div className="px-3 py-1 rounded-full text-xs font-bold text-white" style={{ backgroundColor: match.score >= 90 ? "rgba(103,222,147,0.9)" : "rgba(69,180,198,0.9)" }}>
+                              {match.score}% Match
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-6 flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              {actor && <CategoryBadge category={actor.category} />}
+                              <h3 className="text-xl font-bold mt-1" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>{match.name}</h3>
+                              {actor && <p className="text-xs mt-0.5" style={{ color: "#6CBDC6" }}>{actor.tagline}</p>}
+                            </div>
+                            <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 hidden sm:flex" style={{ backgroundColor: match.score >= 90 ? "#67DE93" : "#45B4C6", color: "white", fontFamily: "Georgia, serif", fontWeight: "bold" }}>
+                              {match.score}%
+                            </div>
+                          </div>
+
+                          <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: "#f0faf4" }}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <svg className="w-4 h-4" fill="#67DE93" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                              <span className="text-xs font-semibold uppercase" style={{ color: "#1A6B38" }}>Warum es passt</span>
+                            </div>
+                            <ul className="space-y-1">
+                              {match.reasons.map((r, j) => (
+                                <li key={j} className="text-sm flex items-start gap-2" style={{ color: "#365F63" }}>
+                                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: "#67DE93" }} />
+                                  {r}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="mt-3 p-4 rounded-xl" style={{ backgroundColor: "#fef3e2" }}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <svg className="w-4 h-4" fill="#f59e0b" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                              <span className="text-xs font-semibold uppercase" style={{ color: "#92400e" }}>Mögliches Ausschlusskriterium</span>
+                            </div>
+                            <p className="text-sm" style={{ color: "#78350f" }}>{match.exclusion}</p>
+                          </div>
+
+                          <div className="flex items-center gap-3 mt-4">
+                            <button onClick={() => { setSelectedIntro(match); setStep(6); window.scrollTo(0, 0); }} className="px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: "#67DE93", color: "#20383A", border: "none", cursor: "pointer" }}>
+                              Intro anfragen →
+                            </button>
+                            {actor && (
+                              <button className="px-5 py-2.5 rounded-full text-sm font-medium transition-all hover:opacity-80" style={{ border: "1px solid #45B4C6", color: "#45B4C6", background: "transparent", cursor: "pointer" }}>
+                                Profil ansehen
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Step 6: Intro */}
+          {step === 6 && selectedIntro && (
+            <div className="max-w-2xl mx-auto px-6 py-16">
+              <StepIndicator />
+              {!introSent ? (
+                <div>
+                  <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Intro anfragen</h1>
+                    <p className="text-sm mt-2" style={{ color: "#6CBDC6" }}>Impact Collective stellt den Kontakt für dich her.</p>
+                  </div>
+                  <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mb-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <svg className="w-5 h-5" fill="none" stroke="#6CBDC6" viewBox="0 0 24 24" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" /></svg>
+                      <span className="text-sm font-semibold" style={{ color: "#20383A" }}>Empfänger</span>
+                    </div>
+                    <p className="text-sm" style={{ color: "#365F63" }}>{selectedIntro.contact}</p>
+                  </div>
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100" style={{ backgroundColor: "#F6F8F8" }}>
+                      <p className="text-xs" style={{ color: "#999" }}>Von: Impact Collective Plattform &lt;matching@impact-collective.de&gt;</p>
+                      <p className="text-xs mt-1" style={{ color: "#999" }}>An: {selectedIntro.contact}</p>
+                      <p className="text-sm font-semibold mt-2" style={{ color: "#20383A" }}>Betreff: Impact Collective Match: AUAR × {selectedIntro.name}</p>
+                    </div>
+                    <div className="p-6 text-sm leading-relaxed" style={{ color: "#365F63" }}>
+                      <p>Sehr geehrtes Team von {selectedIntro.name},</p>
+                      <p className="mt-3">über die Impact Collective Plattform von PHINEO möchten wir Ihnen einen potenziellen Match vorstellen:</p>
+                      <p className="mt-3"><strong style={{ color: "#20383A" }}>AUAR (Automated Architecture)</strong> entwickelt KI-gesteuerte Roboter-Mikrofabriken für nachhaltiges Holzrahmenbauen. Das Startup reduziert CO₂-Emissionen um 80% gegenüber konventionellem Bauen und sucht aktuell eine Seed-Runde über 1 Mio. EUR.</p>
+                      <p className="mt-3"><strong style={{ color: "#20383A" }}>Warum dieser Match?</strong></p>
+                      <p className="mt-1">{selectedIntro.reasons[0]}. {selectedIntro.reasons[1]}.</p>
+                      <p className="mt-3">Gilles Retsin (CTO & Chief Architect, AUAR) würde sich über ein kurzes Kennenlerngespräch freuen. Dürfen wir den Kontakt herstellen?</p>
+                      <p className="mt-4">Mit freundlichen Grüßen,<br/><strong style={{ color: "#20383A" }}>Impact Collective Matching Team</strong><br/>PHINEO gAG</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setIntroSent(true)} className="w-full py-3 rounded-full font-semibold text-sm text-white transition-all hover:opacity-90 mt-6" style={{ backgroundColor: "#67DE93", color: "#20383A", border: "none", cursor: "pointer" }}>
+                    Intro senden →
+                  </button>
+                  <button onClick={() => { setSelectedIntro(null); setStep(5); window.scrollTo(0, 0); }} className="w-full py-2 text-sm font-medium mt-3 transition-all hover:opacity-70" style={{ color: "#45B4C6", background: "none", border: "none", cursor: "pointer" }}>
+                    ← Zurück zu den Matches
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-12" style={{ animation: "fadeSlideUp 0.5s ease-out" }}>
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: "#67DE93" }}>
+                    <svg className="w-10 h-10" fill="white" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                  </div>
+                  <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Intro wurde versendet!</h1>
+                  <p className="text-lg mt-4 max-w-md mx-auto" style={{ color: "#6CBDC6" }}>Das Team von {selectedIntro.name} wird sich innerhalb von <strong style={{ color: "#20383A" }}>5 Werktagen</strong> bei dir melden.</p>
+                  <div className="mt-8 p-6 rounded-2xl max-w-sm mx-auto" style={{ backgroundColor: "#F0F7F8" }}>
+                    <p className="text-sm" style={{ color: "#365F63" }}>Wir haben Gilles Retsin eine Bestätigung an <strong style={{ color: "#20383A" }}>gilles@auar.com</strong> gesendet.</p>
+                  </div>
+                  <div className="flex justify-center gap-4 mt-8">
+                    <button onClick={() => { setSelectedIntro(null); setIntroSent(false); setStep(5); window.scrollTo(0, 0); }} className="px-6 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-80" style={{ border: "1px solid #45B4C6", color: "#45B4C6", background: "transparent", cursor: "pointer" }}>
+                      Weitere Intros anfragen
+                    </button>
+                    <button onClick={onBack} className="px-6 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: "#20383A", color: "white", border: "none", cursor: "pointer" }}>
+                      Zurück zur Plattform
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Footer />
+        </div>
+      );
+    }
+
+    const investorMatches = [
+      {
+        actorId: 8,
+        name: "Concular",
+        score: 94,
+        reasons: [
+          "KI-basiertes Recommender-System matcht Angebot und Nachfrage für Baumaterialien intelligent",
+          "Digitale Materialpass-Technologie mit Machine-Learning-gestützter Qualitätsbewertung",
+          "Seed-Stage (€4.75M raised) — passt zu Ihrer Ticketgröße und Ihrem Investmentfokus"
+        ],
+        exclusion: "Concular hat bisher primär in Deutschland skaliert. Die internationale Expansion steht noch aus und erfordert zusätzliches Kapital — allerdings ist der Markt für zirkuläres Bauen auch in DACH bereits €300 Mrd.+ groß.",
+        kiDetail: "Concular setzt KI ein, um aus Gebäudeabrissen gewonnene Baumaterialien automatisch zu kategorisieren und per Recommender-Algorithmus passenden Neubauprojekten zuzuordnen. Die Plattform transformiert Abbruchabfall in durchsuchbare Rohstoffe.",
+      },
+      {
+        actorId: 35,
+        name: "AUAR",
+        score: 87,
+        reasons: [
+          "KI-gesteuerte Roboter-Mikrofabriken — Kern-KI bei Design-Optimierung und Fertigungssteuerung",
+          "80% CO₂-Reduktion gegenüber konventionellem Bauen — starker Impact-Case",
+          "Expansion von UK nach Europa geplant — passt zum DACH-Investmentfokus"
+        ],
+        exclusion: "AUAR hat Sitz in UK (Bristol/London), nicht in DACH. Die geplante Europa-Expansion ist noch nicht operativ — ein Investment wäre ein Bet auf die Internationalisierung.",
+        kiDetail: "AUAR nutzt KI für die automatisierte Optimierung von Holzrahmen-Designs und die Steuerung der robotergestützten Fertigung. Die Software berechnet materialeffiziente Strukturen und steuert die Mikrofabriken autonom.",
+      },
+      {
+        actorId: 5,
+        name: "PHLAIR",
+        score: 82,
+        reasons: [
+          "Patentierte KI-optimierte Membran-Technologie für Direct Air Capture",
+          "EU Innovation Council gefördert — technologische Validierung durch öffentliche Förderung",
+          "Pilotanlage in Ismaning bei München — DACH-basiert"
+        ],
+        exclusion: "PHLAIR ist Deep Tech mit langen Entwicklungszyklen. Die Kommerzialisierung steht noch am Anfang — es handelt sich um ein technologisch ambitioniertes Frühphasen-Investment mit entsprechendem Risikoprofil.",
+        kiDetail: "PHLAIR setzt Machine Learning ein, um die Effizienz ihrer Membran-Filter für CO₂-Abscheidung aus der Luft zu optimieren. Die KI steuert Prozessparameter in Echtzeit und maximiert die Filterleistung pro Energieeinheit.",
+      },
+    ];
+
+    function InvestorFlowView({ onBack }) {
+      const [step, setStep] = useState(1);
+      const [email, setEmail] = useState("sarah.lindner@gruenwald-capital.de");
+      const [password, setPassword] = useState("Impact2026!");
+      const [searchingMatches, setSearchingMatches] = useState(false);
+      const [matchesVisible, setMatchesVisible] = useState(0);
+      const [selectedIntro, setSelectedIntro] = useState(null);
+      const [introSent, setIntroSent] = useState(false);
+      const [investStage, setInvestStage] = useState("Seed");
+      const [investTicket, setInvestTicket] = useState("250.000 – 1.000.000");
+      const [investFocus, setInvestFocus] = useState("KI & Nachhaltigkeit");
+      const [investRegion, setInvestRegion] = useState("DACH / Europa");
+      const [expandedKi, setExpandedKi] = useState(null);
+
+      useEffect(() => {
+        if (searchingMatches) {
+          const t = setTimeout(() => { setSearchingMatches(false); setStep(4); setMatchesVisible(0); }, 2500);
+          return () => clearTimeout(t);
+        }
+      }, [searchingMatches]);
+
+      useEffect(() => {
+        if (step === 4 && matchesVisible < investorMatches.length) {
+          const t = setTimeout(() => setMatchesVisible((v) => v + 1), 500);
+          return () => clearTimeout(t);
+        }
+      }, [step, matchesVisible]);
+
+      const steps = ["Login", "Kriterien", "Analyse", "Matches", "Intro"];
+      const StepIndicator = () => (
+        <div className="flex items-center justify-center gap-1 mb-8">
+          {steps.map((s, i) => (
+            <React.Fragment key={i}>
+              <div className={"flex items-center justify-center rounded-full text-xs font-bold transition-all " + (i + 1 <= step ? "text-white" : "text-gray-400")}
+                style={{ width: "32px", height: "32px", backgroundColor: i + 1 < step ? "#67DE93" : i + 1 === step ? "#45B4C6" : "#e5e7eb" }}>
+                {i + 1 < step ? "✓" : i + 1}
+              </div>
+              {i < steps.length - 1 && <div className="w-6 h-0.5" style={{ backgroundColor: i + 1 < step ? "#67DE93" : "#e5e7eb" }} />}
+            </React.Fragment>
+          ))}
+        </div>
+      );
+
+      return (
+        <div className="min-h-screen" style={{ backgroundColor: "#FAFBFB" }}>
+          <Header onBack={onBack} onGoHome={onBack} />
+
+          {/* Step 1: Login */}
+          {step === 1 && (
+            <div className="max-w-md mx-auto px-6 py-16">
+              <StepIndicator />
+              <div className="text-center mb-8">
+                <div className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-4" style={{ backgroundColor: "#D4A843", color: "#20383A" }}>Investor Matching</div>
+                <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Willkommen zurück, Sarah.</h1>
+                <p className="text-sm mt-2" style={{ color: "#6CBDC6" }}>Bereit für neue Entdeckungen?</p>
+              </div>
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>E-Mail</label>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm focus:outline-none" style={{ borderColor: "#e0ecee" }} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Passwort</label>
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm focus:outline-none" style={{ borderColor: "#e0ecee" }} />
+                  </div>
+                  <button onClick={() => { setStep(2); window.scrollTo(0, 0); }} className="w-full py-3 rounded-full font-semibold text-sm text-white transition-all hover:opacity-90 mt-2" style={{ backgroundColor: "#D4A843", border: "none", cursor: "pointer" }}>
+                    Anmelden →
+                  </button>
+                </div>
+                <p className="text-center text-xs mt-4" style={{ color: "#999" }}>Noch kein Konto? <span style={{ color: "#D4A843", cursor: "pointer" }}>Registrieren</span></p>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Investmentkriterien */}
+          {step === 2 && (
+            <div className="max-w-2xl mx-auto px-6 py-16">
+              <StepIndicator />
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Investmentkriterien</h1>
+                <p className="text-sm mt-2" style={{ color: "#6CBDC6" }}>Definiere dein Suchprofil — unsere KI findet passende Startups.</p>
+              </div>
+              <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "#D4A843", color: "white", fontFamily: "Georgia, serif", fontWeight: "bold", fontSize: "18px" }}>G</div>
+                  <div>
+                    <p className="font-bold" style={{ color: "#20383A" }}>Sarah Lindner</p>
+                    <p className="text-xs" style={{ color: "#6CBDC6" }}>Investment Managerin · Grünwald Capital Family Office</p>
+                  </div>
+                </div>
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Investmentfokus</label>
+                    <input type="text" value={investFocus} onChange={(e) => setInvestFocus(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm" style={{ borderColor: "#e0ecee" }} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Stage</label>
+                      <select value={investStage} onChange={(e) => setInvestStage(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm" style={{ borderColor: "#e0ecee" }}>
+                        <option>Pre-Seed</option><option>Seed</option><option>Series A</option><option>Series B+</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Ticketgröße (EUR)</label>
+                      <select value={investTicket} onChange={(e) => setInvestTicket(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm" style={{ borderColor: "#e0ecee" }}>
+                        <option>50.000 – 250.000</option><option>250.000 – 1.000.000</option><option>1.000.000 – 5.000.000</option><option>5.000.000+</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Region</label>
+                    <select value={investRegion} onChange={(e) => setInvestRegion(e.target.value)} className="w-full px-4 py-3 rounded-lg border text-sm" style={{ borderColor: "#e0ecee" }}>
+                      <option>DACH / Europa</option><option>Europa</option><option>Global</option><option>Nur Deutschland</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Besondere Interessen (optional)</label>
+                    <input type="text" defaultValue="Circular Economy, Construction Tech, Climate Tech" className="w-full px-4 py-3 rounded-lg border text-sm" style={{ borderColor: "#e0ecee", color: "#999" }} readOnly />
+                  </div>
+                  <button onClick={() => { setStep(3); setSearchingMatches(true); window.scrollTo(0, 0); }} className="w-full py-3 rounded-full font-semibold text-sm text-white transition-all hover:opacity-90 mt-2" style={{ backgroundColor: "#D4A843", border: "none", cursor: "pointer" }}>
+                    Startups finden →
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Analyse (auto-advance) */}
+          {step === 3 && (
+            <div className="max-w-2xl mx-auto px-6 py-24 text-center">
+              <StepIndicator />
+              <div className="inline-flex items-center gap-4 px-8 py-6 rounded-2xl" style={{ backgroundColor: "#F0F7F8" }}>
+                <div className="flex gap-1">
+                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#D4A843", animation: "pulse 1.4s ease-in-out infinite" }} />
+                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#D4A843", animation: "pulse 1.4s ease-in-out 0.2s infinite" }} />
+                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#D4A843", animation: "pulse 1.4s ease-in-out 0.4s infinite" }} />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold" style={{ color: "#20383A" }}>Analysiere 120+ Startups im Netzwerk...</p>
+                  <p className="text-xs mt-1" style={{ color: "#6CBDC6" }}>Filter: {investFocus} · {investStage} · {investRegion}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Ergebnisse */}
+          {step === 4 && !selectedIntro && (
+            <div className="max-w-3xl mx-auto px-6 py-16">
+              <StepIndicator />
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Passende Startups</h1>
+                <p className="text-sm mt-2" style={{ color: "#6CBDC6" }}>Basierend auf: {investFocus} · {investStage} · {investTicket} EUR · {investRegion}</p>
+              </div>
+              <div className="space-y-6">
+                {investorMatches.slice(0, matchesVisible).map((match, i) => {
+                  const actor = actors.find((a) => a.id === match.actorId);
+                  const imageUrl = actor ? actorImages[actor.id] : null;
+                  const isExpanded = expandedKi === match.actorId;
+                  return (
+                    <div key={match.actorId} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm" style={{ animation: "fadeSlideUp 0.5s ease-out" }}>
+                      <div className="flex flex-col sm:flex-row">
+                        <div className="sm:w-44 h-32 sm:h-auto relative flex-shrink-0" style={{ background: actor ? actor.image : "linear-gradient(135deg, #20383A 0%, #45B4C6 100%)" }}>
+                          {imageUrl && <img src={imageUrl} alt={match.name} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.target.style.display = "none"; }} />}
+                          <div className="absolute top-3 left-3">
+                            <div className="px-3 py-1 rounded-full text-xs font-bold text-white" style={{ backgroundColor: match.score >= 90 ? "rgba(103,222,147,0.9)" : "rgba(69,180,198,0.9)" }}>
+                              {match.score}% Match
+                            </div>
+                          </div>
+                        </div>
+                        <div className="p-6 flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              {actor && <CategoryBadge category={actor.category} />}
+                              <h3 className="text-xl font-bold mt-1" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>{match.name}</h3>
+                              {actor && <p className="text-xs mt-0.5" style={{ color: "#6CBDC6" }}>{actor.tagline}</p>}
+                            </div>
+                            <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 hidden sm:flex" style={{ backgroundColor: match.score >= 90 ? "#67DE93" : "#45B4C6", color: "white", fontFamily: "Georgia, serif", fontWeight: "bold" }}>
+                              {match.score}%
+                            </div>
+                          </div>
+
+                          <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: "#f0faf4" }}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <svg className="w-4 h-4" fill="#67DE93" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                              <span className="text-xs font-semibold uppercase" style={{ color: "#1A6B38" }}>Warum es passt</span>
+                            </div>
+                            <ul className="space-y-1">
+                              {match.reasons.map((r, j) => (
+                                <li key={j} className="text-sm flex items-start gap-2" style={{ color: "#365F63" }}>
+                                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: "#67DE93" }} />
+                                  {r}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* KI-Detail aufklappbar */}
+                          <button onClick={() => setExpandedKi(isExpanded ? null : match.actorId)} className="mt-3 flex items-center gap-2 text-xs font-medium transition-all hover:opacity-70" style={{ color: "#45B4C6", background: "none", border: "none", cursor: "pointer" }}>
+                            <svg className={"w-3 h-3 transition-transform " + (isExpanded ? "rotate-90" : "")} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                            Wie setzt {match.name} KI ein?
+                          </button>
+                          {isExpanded && (
+                            <div className="mt-2 p-4 rounded-xl" style={{ backgroundColor: "#EDF6FF", animation: "fadeSlideUp 0.3s ease-out" }}>
+                              <div className="flex items-start gap-2">
+                                <svg className="w-4 h-4 mt-0.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="#45B4C6" strokeWidth="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                                <p className="text-sm leading-relaxed" style={{ color: "#1a3a5c" }}>{match.kiDetail}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="mt-3 p-4 rounded-xl" style={{ backgroundColor: "#fef3e2" }}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <svg className="w-4 h-4" fill="#f59e0b" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                              <span className="text-xs font-semibold uppercase" style={{ color: "#92400e" }}>Mögliches Ausschlusskriterium</span>
+                            </div>
+                            <p className="text-sm" style={{ color: "#78350f" }}>{match.exclusion}</p>
+                          </div>
+
+                          <div className="flex items-center gap-3 mt-4">
+                            <button onClick={() => { setSelectedIntro(match); setStep(5); window.scrollTo(0, 0); }} className="px-5 py-2.5 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: "#D4A843", color: "white", border: "none", cursor: "pointer" }}>
+                              Intro anfragen →
+                            </button>
+                            <button className="px-5 py-2.5 rounded-full text-sm font-medium transition-all hover:opacity-80" style={{ border: "1px solid #45B4C6", color: "#45B4C6", background: "transparent", cursor: "pointer" }}>
+                              Profil ansehen
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Step 5: Intro */}
+          {step === 5 && selectedIntro && (
+            <div className="max-w-2xl mx-auto px-6 py-16">
+              <StepIndicator />
+              {!introSent ? (
+                <div>
+                  <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Intro anfragen</h1>
+                    <p className="text-sm mt-2" style={{ color: "#6CBDC6" }}>Impact Collective stellt den Kontakt für Sie her.</p>
+                  </div>
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100" style={{ backgroundColor: "#F6F8F8" }}>
+                      <p className="text-xs" style={{ color: "#999" }}>Von: Impact Collective Plattform &lt;matching@impact-collective.de&gt;</p>
+                      <p className="text-xs mt-1" style={{ color: "#999" }}>An: Gründerteam, {selectedIntro.name}</p>
+                      <p className="text-sm font-semibold mt-2" style={{ color: "#20383A" }}>Betreff: Impact Collective Match: Grünwald Capital × {selectedIntro.name}</p>
+                    </div>
+                    <div className="p-6 text-sm leading-relaxed" style={{ color: "#365F63" }}>
+                      <p>Sehr geehrtes Team von {selectedIntro.name},</p>
+                      <p className="mt-3">über die Impact Collective Plattform von PHINEO möchten wir Ihnen einen potenziellen Investor vorstellen:</p>
+                      <p className="mt-3"><strong style={{ color: "#20383A" }}>Grünwald Capital Family Office</strong> (Sarah Lindner, Investment Managerin) sucht aktiv nach {investStage}-Investments im Bereich {investFocus} mit einer Ticketgröße von {investTicket} EUR.</p>
+                      <p className="mt-3"><strong style={{ color: "#20383A" }}>Warum dieser Match?</strong></p>
+                      <p className="mt-1">{selectedIntro.reasons[0]}. {selectedIntro.reasons[1]}.</p>
+                      <p className="mt-3">Sarah Lindner würde sich über ein kurzes Kennenlerngespräch freuen. Dürfen wir den Kontakt herstellen?</p>
+                      <p className="mt-4">Mit freundlichen Grüßen,<br/><strong style={{ color: "#20383A" }}>Impact Collective Matching Team</strong><br/>PHINEO gAG</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setIntroSent(true)} className="w-full py-3 rounded-full font-semibold text-sm text-white transition-all hover:opacity-90 mt-6" style={{ backgroundColor: "#D4A843", border: "none", cursor: "pointer" }}>
+                    Intro senden →
+                  </button>
+                  <button onClick={() => { setSelectedIntro(null); setStep(4); window.scrollTo(0, 0); }} className="w-full py-2 text-sm font-medium mt-3 transition-all hover:opacity-70" style={{ color: "#45B4C6", background: "none", border: "none", cursor: "pointer" }}>
+                    ← Zurück zu den Startups
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-12" style={{ animation: "fadeSlideUp 0.5s ease-out" }}>
+                  <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: "#D4A843" }}>
+                    <svg className="w-10 h-10" fill="white" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                  </div>
+                  <h1 className="text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Intro wurde versendet!</h1>
+                  <p className="text-lg mt-4 max-w-md mx-auto" style={{ color: "#6CBDC6" }}>Das Gründerteam von {selectedIntro.name} wird sich innerhalb von <strong style={{ color: "#20383A" }}>5 Werktagen</strong> bei Ihnen melden.</p>
+                  <div className="mt-8 p-6 rounded-2xl max-w-sm mx-auto" style={{ backgroundColor: "#F0F7F8" }}>
+                    <p className="text-sm" style={{ color: "#365F63" }}>Wir haben eine Bestätigung an <strong style={{ color: "#20383A" }}>sarah.lindner@gruenwald-capital.de</strong> gesendet.</p>
+                  </div>
+                  <div className="flex justify-center gap-4 mt-8">
+                    <button onClick={() => { setSelectedIntro(null); setIntroSent(false); setStep(4); window.scrollTo(0, 0); }} className="px-6 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-80" style={{ border: "1px solid #D4A843", color: "#D4A843", background: "transparent", cursor: "pointer" }}>
+                      Weitere Intros anfragen
+                    </button>
+                    <button onClick={onBack} className="px-6 py-3 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: "#20383A", color: "white", border: "none", cursor: "pointer" }}>
+                      Zurück zur Plattform
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Footer />
+        </div>
+      );
+    }
+
+    const getGridLayout = (index) => {
+      const patterns = [
+        { colSpan: "md:col-span-2", rowSpan: "md:row-span-2", height: "h-72 md:h-full", large: true },
+        { colSpan: "md:col-span-1", rowSpan: "md:row-span-1", height: "h-56", large: false },
+        { colSpan: "md:col-span-1", rowSpan: "md:row-span-1", height: "h-56", large: false },
+        { colSpan: "md:col-span-1", rowSpan: "md:row-span-1", height: "h-56", large: false },
+        { colSpan: "md:col-span-1", rowSpan: "md:row-span-1", height: "h-56", large: false },
+        { colSpan: "md:col-span-2", rowSpan: "md:row-span-2", height: "h-72 md:h-full", large: true },
+        { colSpan: "md:col-span-1", rowSpan: "md:row-span-1", height: "h-56", large: false },
+        { colSpan: "md:col-span-1", rowSpan: "md:row-span-1", height: "h-56", large: false },
+      ];
+      return patterns[index % patterns.length];
+    };
+
+    function PhineaLogo({ color = "#20383A", size = 40 }) {
+      return (
+        <svg width={size} height={size * 0.82} viewBox="0 0 120 98" fill="none">
+          <text x="0" y="38" fill={color} fontFamily="Georgia, serif" fontSize="42" fontWeight="700" letterSpacing="5">PHI</text>
+          <text x="0" y="86" fill={color} fontFamily="Georgia, serif" fontSize="42" fontWeight="700" letterSpacing="5">NEO</text>
+        </svg>
+      );
+    }
+
+    function CategoryBadge({ category }) {
+      const colors = categoryColors[category];
+      const cat = categories.find((c) => c.id === category);
+      return (
+        <span
+          style={{ backgroundColor: colors.bg, color: "#fff" }}
+          className="inline-block px-3 py-1 text-xs font-semibold tracking-wide uppercase rounded-full"
+        >
+          {cat && cat.badge}
+        </span>
+      );
+    }
+
+    function ActorCard({ actor, layout, onClick }) {
+      const isLarge = layout.large;
+      const imageUrl = actorImages[actor.id];
+      const logoUrl = actorLogos[actor.id];
+      const isPerson = actor.category === "personen";
+      return (
+        <div
+          onClick={() => onClick(actor)}
+          className={"group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 " + layout.colSpan + " " + layout.rowSpan + " " + layout.height}
+        >
+          <div className="absolute inset-0" style={{ background: actor.image }} />
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt={actor.name}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              style={Object.assign({}, isPerson ? { objectPosition: "center 15%" } : {}, actorImageStyles[actor.id] || {})}
+              onError={(e) => { e.target.style.display = "none"; }}
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
+          <div className={"relative h-full flex flex-col justify-between " + (isLarge ? "p-4 pb-3" : "p-3 pb-2")}>
+            <div>
+              <CategoryBadge category={actor.category} />
+            </div>
+            <div>
+              <h3
+                className={"text-white font-bold " + (isLarge ? "text-xl md:text-3xl leading-snug" : "text-sm md:text-base leading-tight")}
+                style={{ fontFamily: "Georgia, serif" }}
+              >
+                {actor.name}
+              </h3>
+              <p className={"text-white/85 leading-tight " + (isLarge ? "mt-1 text-sm" : "mt-0.5 text-xs line-clamp-1")}>
+                {actor.tagline}
+              </p>
+              {isLarge && (
+                <p className="text-white/60 mt-1 text-xs leading-snug hidden md:block line-clamp-2">
+                  {actor.description}
+                </p>
+              )}
+              <div className={"flex items-center text-white/60 group-hover:text-white transition-colors " + (isLarge ? "mt-2" : "mt-1")}>
+                <span className="text-xs font-medium">Profil ansehen</span>
+                <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function VideoEmbed({ videoId, title }) {
+      return (
+        <div>
+          <h2 className="text-2xl font-bold mb-4" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Video</h2>
+          <a href={"https://www.youtube.com/watch?v=" + videoId} target="_blank" rel="noopener noreferrer" className="block rounded-2xl overflow-hidden group" style={{ position: "relative", textDecoration: "none" }}>
+            <img src={"https://img.youtube.com/vi/" + videoId + "/maxresdefault.jpg"} alt={title} className="w-full rounded-2xl transition-transform duration-500 group-hover:scale-105" onError={(e) => { e.target.src = "https://img.youtube.com/vi/" + videoId + "/hqdefault.jpg"; }} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/5 group-hover:from-black/70 transition-all rounded-2xl" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-2xl transition-transform duration-300 group-hover:scale-110" style={{ backgroundColor: "rgba(255,0,0,0.9)" }}>
+                <svg className="w-9 h-9 ml-1" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between">
+              <div>
+                <p className="text-white font-semibold text-base drop-shadow-lg">{title}</p>
+                <p className="text-white/60 text-xs mt-1">Auf YouTube ansehen</p>
+              </div>
+              <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-white text-xs font-medium" style={{ backgroundColor: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)" }}>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M21.543 6.498C22 8.28 22 12 22 12s0 3.72-.457 5.502c-.254.985-.997 1.76-1.938 2.022C17.896 20 12 20 12 20s-5.893 0-7.605-.476c-.945-.266-1.687-1.04-1.938-2.022C2 15.72 2 12 2 12s0-3.72.457-5.502c.254-.985.997-1.76 1.938-2.022C6.107 4 12 4 12 4s5.896 0 7.605.476c.945.266 1.687 1.04 1.938 2.022z"/><path d="M10 15.5l6-3.5-6-3.5v7z" fill="rgba(255,0,0,0.9)"/></svg>
+                YouTube
+              </div>
+            </div>
+          </a>
+        </div>
+      );
+    }
+
+    function WirktSiegel() {
+      return (
+        <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #e5e7eb" }}>
+          <div className="p-5 bg-white">
+            <img src="Grafiken/PHI-Wirkt-Siegel-quer-NEUTRAL.png" alt="PHINEO Wirkt-Siegel – geprüft & empfohlen" style={{ width: "100%", maxWidth: "420px" }} />
+            <div className="mt-3">
+              <p className="text-xs" style={{ color: "#999" }}>Geprüft von PHINEO im Rahmen der Wirkungsanalyse · 11/2025</p>
+              <a href="https://www.phineo.org/en/seal-of-impact" className="inline-block mt-2 text-xs font-medium hover:opacity-80 transition-opacity" style={{ color: "#45B4C6", textDecoration: "none" }}>Mehr über das Wirkt-Siegel →</a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ImmpactBadge() {
+      return (
+        <div className="rounded-2xl overflow-hidden flex items-center gap-5 px-6 py-5" style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #2d2b55 60%, #3b3575 100%)" }}>
+          <div className="flex-shrink-0">
+            <img src="Grafiken/immpact-icon.png" alt="IMMPACT verifiziert" className="rounded-xl" style={{ width: "80px", height: "80px" }} />
+          </div>
+          <div>
+            <p className="text-white font-bold text-base leading-snug" style={{ fontFamily: "Georgia, serif" }}>Wirkungserfassung nach dem IMMPACT-Modell</p>
+            <a href="https://immpact.guide" className="inline-block mt-2 text-xs font-medium hover:opacity-80 transition-opacity" style={{ color: "#67DE93", textDecoration: "none" }}>Mehr über IMMPACT →</a>
+          </div>
+        </div>
+      );
+    }
+
+    function DnkBadge() {
+      return (
+        <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #e5e7eb" }}>
+          <div className="flex items-center gap-3 px-5 py-3" style={{ backgroundColor: "#003B5C" }}>
+            <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: "#0077B6" }}>
+              <svg className="w-3.5 h-3.5" fill="white" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+            </div>
+            <span className="text-white font-bold text-sm tracking-wide">Deutscher Nachhaltigkeitskodex</span>
+          </div>
+          <div className="p-5 bg-white flex items-center gap-5">
+            <div className="flex-shrink-0">
+              <div className="rounded-lg flex flex-col items-center justify-center" style={{ width: "72px", height: "72px", backgroundColor: "#003B5C" }}>
+                <span className="text-white font-bold text-lg leading-none">DNK</span>
+                <div className="w-8 h-0.5 rounded-full mt-1.5 mb-1" style={{ backgroundColor: "#0077B6" }} />
+                <span className="text-white/70 leading-tight" style={{ fontSize: "7px" }}>zertifiziert</span>
+              </div>
+            </div>
+            <div>
+              <p className="font-semibold text-sm" style={{ color: "#20383A" }}>Transparenz und Nachhaltigkeit nach DNK-Standard.</p>
+              <p className="text-xs mt-1" style={{ color: "#999" }}>Nachhaltigkeitsberichterstattung gemäß dem Deutschen Nachhaltigkeitskodex.</p>
+              <a href="#" className="inline-block mt-2 text-xs font-medium hover:opacity-80 transition-opacity" style={{ color: "#0077B6", textDecoration: "none" }}>Mehr über den DNK →</a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function WirkungSection({ actor }) {
+      const hasWirktSiegel = wirktSiegel.includes(actor.id);
+      const hasImmpact = immpactVerifiziert.includes(actor.id);
+      const hasDnk = dnkVerifiziert.includes(actor.id);
+      const hasSdgs = actor.sdgs && actor.sdgs.length > 0;
+
+      if (!hasSdgs && !hasWirktSiegel && !hasImmpact && !hasDnk) return null;
+
+      return (
+        <div>
+          <h2 className="text-2xl font-bold mb-6" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Wirkung</h2>
+          <div className="space-y-6">
+            {hasSdgs && (
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: "#6CBDC6" }}>Sustainable Development Goals</h3>
+                <div className="flex flex-wrap gap-3">
+                  {actor.sdgs.map((sdg) => {
+                    const data = sdgData[sdg];
+                    if (!data) return null;
+                    const iconUrl = sdgIconUrls[sdg];
+                    return (
+                      <div key={sdg} className="rounded-lg overflow-hidden flex-shrink-0 cursor-default shadow-sm hover:shadow-md transition-shadow" style={{ width: "96px", height: "96px", backgroundColor: data.color }} title={"SDG " + sdg + ": " + data.name}>
+                        {iconUrl ? (
+                          <img src={iconUrl} alt={"SDG " + sdg + ": " + data.name} className="w-full h-full object-cover" onError={(e) => { e.target.style.display = "none"; e.target.parentElement.innerHTML = '<div style="padding:10px;display:flex;flex-direction:column;height:100%;justify-content:space-between"><span style="color:white;font-weight:bold;font-size:1.5rem;font-family:Georgia,serif">' + sdg + '</span><span style="color:white;font-weight:bold;font-size:8px;text-transform:uppercase">' + data.name + '</span></div>'; }} />
+                        ) : (
+                          <div className="p-2.5 flex flex-col h-full justify-between">
+                            <span className="text-white font-bold text-2xl leading-none" style={{ fontFamily: "Georgia, serif" }}>{sdg}</span>
+                            <span className="text-white font-bold leading-tight uppercase" style={{ fontSize: "8px", letterSpacing: "0.03em" }}>{data.name}</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {hasWirktSiegel && <WirktSiegel />}
+            {hasImmpact && <ImmpactBadge />}
+            {hasDnk && <DnkBadge />}
+          </div>
+        </div>
+      );
+    }
+
+    function ProfileView({ actor, onBack, onGoToMatching }) {
+      const cat = categories.find((c) => c.id === actor.category);
+      const colors = categoryColors[actor.category];
+      const extras = profileExtras[actor.id] || {};
+      const relatedActors = actors.filter((a) => a.id !== actor.id && (a.category === actor.category || (actor.sdgs && a.sdgs && a.sdgs.some((s) => actor.sdgs.includes(s))))).slice(0, 3);
+
+      return (
+        <div className="min-h-screen" style={{ backgroundColor: "#FAFBFB" }}>
+          <Header onBack={onBack} onGoToMatching={onGoToMatching} onGoHome={onBack} />
+          <div className="relative h-72 md:h-96" style={{ background: actor.image }}>
+            {actorImages[actor.id] && (
+              <img src={actorImages[actor.id]} alt={actor.name} className="absolute inset-0 w-full h-full object-cover" style={Object.assign({}, actor.category === "personen" ? { objectPosition: "center 15%" } : {}, actorImageStyles[actor.id] || {})} onError={(e) => { e.target.style.display = "none"; }} />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 max-w-7xl mx-auto">
+              <div className="flex items-end gap-6">
+                {actor.category !== "personen" && (
+                  <div className="hidden md:flex flex-shrink-0 rounded-2xl shadow-xl items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.95)", backdropFilter: "blur(8px)", width: "72px", height: "72px" }}>
+                    {actorLogos[actor.id] ? (
+                      <img src={actorLogos[actor.id]} alt={actor.name + " Logo"} className="w-10 h-10 object-contain" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} />
+                    ) : null}
+                    <span style={{ display: actorLogos[actor.id] ? "none" : "flex", color: colors.bg, fontFamily: "Georgia, serif", fontWeight: "bold", fontSize: "32px" }}>{actor.name.charAt(0)}</span>
+                  </div>
+                )}
+                <div>
+                  <CategoryBadge category={actor.category} />
+                  <h1 className="text-4xl md:text-6xl font-bold text-white mt-3" style={{ fontFamily: "Georgia, serif" }}>{actor.name}</h1>
+                  <p className="text-xl text-white/80 mt-3" style={{ fontFamily: "Georgia, serif" }}>{actor.tagline}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {extras.impact && (
+            <div className="border-b border-gray-100 bg-white">
+              <div className="max-w-7xl mx-auto px-6 md:px-12 py-6">
+                <div className="grid grid-cols-3 gap-8">
+                  {extras.impact.map((item, i) => (
+                    <div key={i} className="text-center">
+                      <div className="text-2xl md:text-3xl font-bold" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>{item.num}</div>
+                      <div className="text-xs md:text-sm mt-1" style={{ color: "#6CBDC6" }}>{item.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="max-w-7xl mx-auto px-6 md:px-12 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <div className="md:col-span-2 space-y-10">
+                <div>
+                  <h2 className="text-2xl font-bold mb-4" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>
+                    {actor.category === "personen" ? "Über " + actor.name.split(" ")[0] : "Über " + actor.name}
+                  </h2>
+                  <p className="text-lg leading-relaxed" style={{ color: "#20383A" }}>{extras.longDesc || actor.description}</p>
+                </div>
+                {extras.video && (
+                  <VideoEmbed videoId={extras.video.id} title={extras.video.title} />
+                )}
+                {extras.quote && (
+                  <blockquote className="border-l-4 pl-6 py-2" style={{ borderColor: "#45B4C6" }}>
+                    <p className="text-xl italic leading-relaxed" style={{ color: "#365F63", fontFamily: "Georgia, serif" }}>"{extras.quote}"</p>
+                    {actor.category === "personen" && <cite className="block mt-3 text-sm not-italic font-medium" style={{ color: "#6CBDC6" }}>— {actor.name}</cite>}
+                  </blockquote>
+                )}
+                {actor.category === "personen" && (
+                  <div className="p-6 rounded-2xl" style={{ backgroundColor: "#F6F8F8" }}>
+                    <h3 className="text-sm font-semibold uppercase tracking-wider mb-2" style={{ color: "#6CBDC6" }}>Aktuelle Rolle</h3>
+                    <p className="text-lg font-medium" style={{ color: "#20383A" }}>{actor.role}</p>
+                  </div>
+                )}
+                {extras.highlights && (
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Highlights</h2>
+                    <div className="space-y-3">
+                      {extras.highlights.map((h, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          <div className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: colors.bg }} />
+                          <p className="text-base" style={{ color: "#20383A" }}>{h}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <WirkungSection actor={actor} />
+                {relatedActors.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold mb-4" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Im Netzwerk</h2>
+                    <p className="text-sm mb-4" style={{ color: "#6CBDC6" }}>Weitere Akteure auf der Impact Collective Plattform</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {relatedActors.map((rel) => (
+                        <div key={rel.id} className="rounded-xl overflow-hidden cursor-pointer group hover:shadow-lg transition-all">
+                          <div className="h-28 relative" style={{ background: rel.image }}>
+                            {actorImages[rel.id] && <img src={actorImages[rel.id]} alt={rel.name} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.target.style.display = "none"; }} />}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                            <div className="absolute bottom-0 left-0 right-0 p-3">
+                              <CategoryBadge category={rel.category} />
+                              <p className="text-white font-bold text-sm mt-1">{rel.name}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-6">
+                {actor.category !== "personen" && (
+                  <div className="rounded-2xl p-6 flex items-center justify-center" style={{ backgroundColor: "#FFFFFF", border: "1px solid #e5e7eb" }}>
+                    {actorLogos[actor.id] ? (
+                      <img src={actorLogos[actor.id]} alt={actor.name + " Logo"} className="w-12 h-12 object-contain" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }} />
+                    ) : null}
+                    <div style={{ display: actorLogos[actor.id] ? "none" : "flex", alignItems: "center", gap: "8px" }}>
+                      <span className="flex items-center justify-center rounded-xl text-white font-bold" style={{ width: "48px", height: "48px", backgroundColor: colors.bg, fontFamily: "Georgia, serif", fontSize: "24px" }}>{actor.name.charAt(0)}</span>
+                      <span className="font-bold text-lg" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>{actor.name}</span>
+                    </div>
+                  </div>
+                )}
+                <div className="rounded-2xl p-6 space-y-5" style={{ backgroundColor: "#F6F8F8" }}>
+                  <div><h4 className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "#6CBDC6" }}>Kategorie</h4><p className="font-medium" style={{ color: "#20383A" }}>{cat && cat.label}</p></div>
+                  {actor.location && <div><h4 className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "#6CBDC6" }}>Standort</h4><p className="font-medium" style={{ color: "#20383A" }}>{actor.location}</p></div>}
+                  {actor.founded && <div><h4 className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "#6CBDC6" }}>Gegründet</h4><p className="font-medium" style={{ color: "#20383A" }}>{actor.founded}</p></div>}
+                  {actor.website && <div><h4 className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "#6CBDC6" }}>Website</h4><p className="font-medium" style={{ color: "#45B4C6" }}>{actor.website}</p></div>}
+                </div>
+                <div className="rounded-2xl p-6 border border-gray-100 bg-white">
+                  <div className="flex items-center gap-2 mb-3">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#45B4C6" strokeWidth="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    <h4 className="text-sm font-semibold" style={{ color: "#20383A" }}>KI-Matching</h4>
+                  </div>
+                  <p className="text-sm" style={{ color: "#6CBDC6" }}>Unsere KI hat <strong style={{ color: "#20383A" }}>12 potenzielle Matches</strong> für {actor.name} identifiziert.</p>
+                  <button onClick={() => onGoToMatching && onGoToMatching("Partner für " + actor.name)} className="mt-3 w-full py-2.5 rounded-full font-semibold text-xs transition-all hover:opacity-90" style={{ border: "1px solid #45B4C6", color: "#45B4C6", background: "transparent", cursor: "pointer" }}>Matches ansehen →</button>
+                </div>
+                <div className="rounded-2xl p-6 text-white" style={{ backgroundColor: "#20383A" }}>
+                  <h3 className="text-lg font-bold" style={{ fontFamily: "Georgia, serif" }}>Kontakt aufnehmen</h3>
+                  <p className="text-white/60 text-sm mt-2">Interesse an einer Zusammenarbeit? PHINEO stellt den Kontakt her.</p>
+                  <button className="mt-4 w-full py-3 rounded-full font-semibold text-sm transition-all hover:opacity-90" style={{ backgroundColor: "#67DE93", color: "#20383A" }}>Kontakt anfragen →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="max-w-7xl mx-auto px-6 md:px-12 pb-16">
+            <button onClick={onBack} className="flex items-center gap-2 text-sm font-medium transition-colors hover:opacity-70" style={{ color: "#45B4C6", background: "none", border: "none", cursor: "pointer" }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              Zurück zur Übersicht
+            </button>
+          </div>
+          <Footer />
+        </div>
+      );
+    }
+
+    function Header({ onBack, onGoToMatching, onGoHome }) {
+      return (
+        <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {onBack && (
+                <button onClick={onBack} className="mr-2 p-1 rounded-full hover:bg-gray-100 transition-colors" style={{ background: "none", border: "none", cursor: "pointer" }}>
+                  <svg className="w-5 h-5" fill="none" stroke="#20383A" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+              )}
+              <div style={{ cursor: "pointer" }} onClick={onGoHome}>
+                <PhineaLogo size={48} />
+              </div>
+              <div className="w-px h-10 bg-gray-200" />
+              <div style={{ cursor: "pointer" }} onClick={onGoHome}>
+                <span className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Impact </span>
+                <span className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: "#45B4C6", fontFamily: "Georgia, serif" }}>Collective</span>
+              </div>
+            </div>
+            <nav className="hidden md:flex items-center gap-8">
+              <a href="#" onClick={(e) => { e.preventDefault(); onGoHome && onGoHome(); }} className="text-sm font-medium tracking-wide uppercase hover:opacity-70 transition-opacity" style={{ color: "#20383A", textDecoration: "none" }}>Akteure</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); onGoToMatching && onGoToMatching(); }} className="text-sm font-medium tracking-wide uppercase hover:opacity-70 transition-opacity" style={{ color: "#20383A", textDecoration: "none" }}>Matching</a>
+              <a href="#" className="text-sm font-medium tracking-wide uppercase hover:opacity-70 transition-opacity" style={{ color: "#20383A", textDecoration: "none" }}>Events</a>
+              <a href="#" className="text-sm font-medium tracking-wide uppercase hover:opacity-70 transition-opacity" style={{ color: "#20383A", textDecoration: "none" }}>Über uns</a>
+              <button className="px-5 py-2 rounded-full text-sm font-semibold transition-all hover:opacity-90" style={{ backgroundColor: "transparent", border: "1px solid #45B4C6", color: "#45B4C6", cursor: "pointer" }}>Login</button>
+              <button className="px-5 py-2 rounded-full text-sm font-semibold text-white transition-all hover:opacity-90" style={{ backgroundColor: "#67DE93", color: "#20383A", border: "none", cursor: "pointer" }}>Registrieren</button>
+            </nav>
+          </div>
+        </header>
+      );
+    }
+
+    function Footer() {
+      return (
+        <footer style={{ backgroundColor: "#20383A" }}>
+          <div className="max-w-7xl mx-auto px-6 py-16">
+            <div className="flex flex-col md:flex-row justify-between items-start gap-12">
+              <div>
+                <div className="flex items-center gap-4">
+                  <PhineaLogo color="#FFFFFF" size={48} />
+                  <div className="w-px h-10" style={{ backgroundColor: "rgba(255,255,255,0.2)" }} />
+                  <div>
+                    <span className="text-xl font-bold text-white" style={{ fontFamily: "Georgia, serif" }}>Impact </span>
+                    <span className="text-xl font-bold" style={{ color: "#45B4C6", fontFamily: "Georgia, serif" }}>Collective</span>
+                  </div>
+                </div>
+                <p className="text-sm mt-4 max-w-sm" style={{ color: "rgba(255,255,255,0.5)" }}>Zusammen erreichen wir mehr. Die Plattform für das Impact-Ökosystem in Deutschland.</p>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
+                <div>
+                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: "#6CBDC6" }}>Plattform</h4>
+                  <div className="space-y-3">
+                    {["Akteure entdecken", "KI-Matching", "Events", "Impact Gipfel"].map(item => <a key={item} href="#" className="block text-sm hover:text-white transition-colors" style={{ color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{item}</a>)}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: "#6CBDC6" }}>PHINEO</h4>
+                  <div className="space-y-3">
+                    {["Über PHINEO", "Spenden mit Impact", "IMMPACT", "Wirkt-Siegel"].map(item => <a key={item} href="#" className="block text-sm hover:text-white transition-colors" style={{ color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{item}</a>)}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: "#6CBDC6" }}>Kontakt</h4>
+                  <div className="space-y-3">
+                    {["Newsletter", "Anfahrt & Kontakt", "Datenschutz", "Impressum"].map(item => <a key={item} href="#" className="block text-sm hover:text-white transition-colors" style={{ color: "rgba(255,255,255,0.6)", textDecoration: "none" }}>{item}</a>)}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
+              <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>© 2026 PHINEO gAG. Alle Rechte vorbehalten.</p>
+              <p className="text-xs mt-2 md:mt-0" style={{ color: "rgba(255,255,255,0.4)" }}>Gefördert durch das BMWK im Rahmen von NaWi – Nachhaltig Wirken (ESF+)</p>
+            </div>
+          </div>
+        </footer>
+      );
+    }
+
+    function ImpactCollective() {
+      const [activeFilter, setActiveFilter] = useState("alle");
+      const [selectedActor, setSelectedActor] = useState(null);
+      const [currentView, setCurrentView] = useState("listing"); // listing | profile | matching | funding
+      const [matchingQuery, setMatchingQuery] = useState(null);
+
+      const filteredActors = activeFilter === "alle" ? actors : actors.filter((a) => a.category === activeFilter);
+
+      function goToMatching(query) {
+        setMatchingQuery(query || null);
+        setCurrentView("matching");
+        window.scrollTo(0, 0);
+      }
+
+      function goToProfile(actor) {
+        setSelectedActor(actor);
+        setCurrentView("profile");
+        window.scrollTo(0, 0);
+      }
+
+      function goToFunding() {
+        setCurrentView("funding");
+        window.scrollTo(0, 0);
+      }
+
+      function goToInvestor() {
+        setCurrentView("investor");
+        window.scrollTo(0, 0);
+      }
+
+      function goToListing() {
+        setSelectedActor(null);
+        setCurrentView("listing");
+        setMatchingQuery(null);
+        window.scrollTo(0, 0);
+      }
+
+      if (currentView === "funding") {
+        return <FundingFlowView onBack={goToListing} />;
+      }
+
+      if (currentView === "investor") {
+        return <InvestorFlowView onBack={goToListing} />;
+      }
+
+      if (currentView === "matching") {
+        return <MatchingView onBack={goToListing} onSelectActor={goToProfile} initialQuery={matchingQuery} onGoToFunding={goToFunding} onGoToInvestor={goToInvestor} />;
+      }
+
+      if (currentView === "profile" && selectedActor) {
+        return <ProfileView actor={selectedActor} onBack={goToListing} onGoToMatching={goToMatching} />;
+      }
+
+      return (
+        <div className="min-h-screen" style={{ backgroundColor: "#FAFBFB" }}>
+          <Header onGoToMatching={() => goToMatching()} onGoHome={goToListing} />
+
+          <section className="relative overflow-hidden" style={{ background: "linear-gradient(170deg, #20383A 0%, #2a4a4d 40%, #365F63 100%)" }}>
+            <div className="max-w-7xl mx-auto px-6 py-12 md:py-20 relative z-10">
+              <div className="max-w-5xl">
+                <div className="mb-8">
+                  <h1 className="leading-none">
+                    <span className="block text-6xl md:text-8xl font-bold tracking-tight" style={{ color: "#FFFFFF", fontFamily: "Georgia, serif" }}>Impact</span>
+                    <span className="block text-6xl md:text-8xl font-bold tracking-tight" style={{ color: "#45B4C6", fontFamily: "Georgia, serif", marginTop: "-6px" }}>Collective.</span>
+                  </h1>
+                </div>
+                <div className="max-w-3xl">
+                  <p className="text-2xl md:text-3xl font-normal leading-snug" style={{ color: "rgba(255,255,255,0.9)", fontFamily: "Georgia, serif" }}>Zusammen erreichen wir mehr.<br/>Wir bringen die Richtigen zusammen.</p>
+                </div>
+              </div>
+            </div>
+            <div className="absolute -right-32 -top-16 w-96 h-96 rounded-full" style={{ backgroundColor: "#45B4C6", opacity: 0.1 }} />
+            <div className="absolute right-20 bottom-0 w-64 h-64 rounded-full" style={{ backgroundColor: "#67DE93", opacity: 0.08 }} />
+            <div className="absolute left-1/2 -bottom-20 w-80 h-80 rounded-full" style={{ backgroundColor: "#FFFFFF", opacity: 0.05 }} />
+          </section>
+
+          <div className="max-w-7xl mx-auto px-6 py-6">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-2 text-sm" style={{ color: "#6CBDC6" }}>
+              <span><strong style={{ color: "#20383A" }}>456+</strong> NGOs</span>
+              <span className="text-gray-300">·</span>
+              <span><strong style={{ color: "#20383A" }}>120+</strong> Startups</span>
+              <span className="text-gray-300">·</span>
+              <span><strong style={{ color: "#20383A" }}>85</strong> Kapitalgeber</span>
+              <span className="text-gray-300">·</span>
+              <span><strong style={{ color: "#20383A" }}>32</strong> Persönlichkeiten</span>
+              <span className="text-gray-300">·</span>
+              <span><strong style={{ color: "#20383A" }}>11</strong> Kategorien</span>
+            </div>
+          </div>
+
+          <section className="max-w-7xl mx-auto px-6">
+            <div className="flex items-center gap-2 overflow-x-auto pb-4">
+              {categories.map((cat) => {
+                const isActive = activeFilter === cat.id;
+                const colors = categoryColors[cat.id];
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveFilter(cat.id)}
+                    className={"whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 " + (isActive ? "text-white shadow-md" : "text-gray-600 bg-white hover:border-gray-400")}
+                    style={isActive ? { backgroundColor: cat.id === "alle" ? "#20383A" : (colors && colors.bg) || "#20383A", border: "1px solid " + (cat.id === "alle" ? "#20383A" : (colors && colors.bg) || "#20383A"), cursor: "pointer" } : { border: "1px solid #e5e7eb", cursor: "pointer", background: "white" }}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="max-w-7xl mx-auto px-6 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-auto">
+              {filteredActors.map((actor, index) => (
+                <ActorCard key={actor.id} actor={actor} layout={getGridLayout(index)} onClick={goToProfile} />
+              ))}
+              {(activeFilter === "alle" || activeFilter === "vcs") && (
+                <div className="md:col-span-3 rounded-2xl overflow-hidden relative" style={{ background: "linear-gradient(135deg, #20383A 0%, #2a4a4d 50%, #1a5276 100%)" }}>
+                  <div className="px-8 py-8 md:py-10 md:px-12 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#45B4C6" }}>
+                        <svg className="w-6 h-6" fill="white" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                      </div>
+                      <div>
+                        <h3 className="text-xl md:text-2xl font-bold text-white" style={{ fontFamily: "Georgia, serif" }}>KI-gestütztes Matching</h3>
+                        <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,0.6)" }}>Wir bringen Startups und Kapitalgeber intelligent zusammen.</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                      <button onClick={() => goToFunding()} className="px-6 py-3 rounded-full font-semibold text-sm transition-all hover:opacity-90 whitespace-nowrap" style={{ backgroundColor: "#67DE93", color: "#20383A", border: "none", cursor: "pointer" }}>
+                        Du bist Startup & suchst Funding? →
+                      </button>
+                      <button onClick={() => goToInvestor()} className="px-6 py-3 rounded-full font-semibold text-sm text-white hover:border-white/60 transition-all whitespace-nowrap" style={{ border: "2px solid rgba(255,255,255,0.3)", background: "transparent", cursor: "pointer" }}>
+                        Du bist Investor & scoutest Startups? →
+                      </button>
+                    </div>
+                  </div>
+                  <div className="absolute -right-10 -top-10 w-48 h-48 rounded-full" style={{ backgroundColor: "#45B4C6", opacity: 0.08 }} />
+                  <div className="absolute left-1/3 -bottom-8 w-32 h-32 rounded-full" style={{ backgroundColor: "#67DE93", opacity: 0.06 }} />
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="max-w-7xl mx-auto px-6 py-16">
+            <div className="rounded-3xl p-10 md:p-16 relative overflow-hidden" style={{ backgroundColor: "#20383A" }}>
+              <div className="relative z-10 max-w-2xl">
+                <div className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase mb-6" style={{ backgroundColor: "#45B4C6", color: "#20383A" }}>KI-Matching</div>
+                <h2 className="text-3xl md:text-5xl font-bold text-white leading-tight" style={{ fontFamily: "Georgia, serif" }}>Finde die richtigen Partner.</h2>
+                <p className="text-lg mt-6 leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>Unser KI-gestütztes Matching bringt Kapitalgeber und Impact-Organisationen zusammen – intelligent, kuratiert und mit Begründung, warum es passt.</p>
+                <div className="flex flex-wrap gap-4 mt-8">
+                  <button onClick={() => goToInvestor()} className="px-6 py-3 rounded-full font-semibold text-sm transition-all hover:opacity-90" style={{ backgroundColor: "#67DE93", color: "#20383A", border: "none", cursor: "pointer" }}>Ich suche Projekte →</button>
+                  <button onClick={() => goToFunding()} className="px-6 py-3 rounded-full font-semibold text-sm text-white hover:border-white/60 transition-all" style={{ border: "2px solid rgba(255,255,255,0.3)", background: "transparent", cursor: "pointer" }}>Ich suche Finanzierung →</button>
+                </div>
+              </div>
+              <div className="absolute -right-10 -bottom-10 w-80 h-80 rounded-full" style={{ backgroundColor: "#45B4C6", opacity: 0.1 }} />
+              <div className="absolute right-20 top-10 w-40 h-40 rounded-full" style={{ backgroundColor: "#67DE93", opacity: 0.1 }} />
+            </div>
+          </section>
+
+          <section className="max-w-7xl mx-auto px-6 py-8 pb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8" style={{ color: "#20383A", fontFamily: "Georgia, serif" }}>Events</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 hover:shadow-xl transition-all cursor-pointer group">
+                <div className="h-48 relative" style={{ background: "linear-gradient(135deg, #20383A 0%, #45B4C6 100%)" }}>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <div className="text-sm font-semibold tracking-widest uppercase opacity-75">September 2026</div>
+                      <div className="text-4xl font-bold mt-2" style={{ fontFamily: "Georgia, serif" }}>Impact Gipfel</div>
+                      <div className="text-sm mt-2 opacity-75">Berlin · 18.–20. September</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <p className="text-gray-600 text-sm leading-relaxed">Triff 200 Impact-Startups und die Investoren, Stiftungen und Unternehmen, die mit ihnen die Zukunft bauen wollen.</p>
+                  <div className="flex items-center mt-4 text-sm font-medium group-hover:translate-x-1 transition-transform" style={{ color: "#45B4C6" }}>Mehr erfahren →</div>
+                </div>
+              </div>
+              <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 hover:shadow-xl transition-all cursor-pointer group">
+                <div className="h-48 relative" style={{ background: "linear-gradient(135deg, #365F63 0%, #67DE93 100%)" }}>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <div className="text-sm font-semibold tracking-widest uppercase opacity-75">Webinar-Reihe</div>
+                      <div className="text-4xl font-bold mt-2" style={{ fontFamily: "Georgia, serif" }}>Matching Sessions</div>
+                      <div className="text-sm mt-2 opacity-75">Online · Monatlich</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <p className="text-gray-600 text-sm leading-relaxed">Thematische Online-Events, bei denen KI-generierte Matches persönlich vorgestellt und besprochen werden.</p>
+                  <div className="flex items-center mt-4 text-sm font-medium group-hover:translate-x-1 transition-transform" style={{ color: "#45B4C6" }}>Alle Events ansehen →</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <Footer />
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<ImpactCollective />);
+  </script>
+</body>
+</html>
