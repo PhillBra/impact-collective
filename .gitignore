@@ -2,7 +2,7 @@
 .DS_Store
 ._*
 
-# Backups
+# Backups (werden separat gesichert)
 *-BACKUP-*.html
 
 # Editor
