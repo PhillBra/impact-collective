@@ -1,11 +1,1 @@
-# macOS
 .DS_Store
-._*
-
-# Backups (werden separat gesichert)
-*-BACKUP-*.html
-
-# Editor
-*.swp
-*.swo
-*~
